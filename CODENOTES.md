@@ -225,3 +225,125 @@ In many other languages, values can either be assigned/passed by value-copy or b
 
 > …
 
+## Chapter 3: Natives
+
+Here's a list of the most commonly used natives:
+
+- String()
+- Number()
+- Boolean()
+- Array()
+- Object()
+- Function()
+- RegExp()
+- Date()
+- Error()
+- Symbol()
+
+As you can see, these natives are actually built-in functions.
+
+The result of the constructor form of value creation (new String("abc")) is an object wrapper around the primitive ("abc") value.
+
+### Internal [[Class]]
+Values that are typeof "object" (such as an array) are additionally tagged with an internal [[Class]] property. This property cannot be accessed directly, but can generally be revealed indirectly by borrowing the default Object.prototype.toString(..) method called against the value. 
+
+> Object.prototype.toString.call( [1,2,3] );			// "[object Array]"
+
+So, for the array in this example, the internal [[Class]] value is "Array".
+
+### Boxing Wrappers
+
+These object wrappers serve a very important purpose. Primitive values don't have properties or methods, so to access .length or .toString() you need an object wrapper around the value. Thankfully, JS will automatically box (aka wrap) the primitive value to fulfill such accesses.
+
+> var a = "abc";  
+
+> a.length; // 3  
+> a.toUpperCase(); // "ABC"
+
+#### Object Wrapper Gotchas
+
+There are some gotchas with using the object wrappers directly that you should be aware of if you do choose to ever use them.
+
+For example, consider *Boolean* wrapped values:
+
+> var a = new Boolean( false );
+
+> if (!a) {
+> 	console.log( "Oops" ); // never runs
+> }
+
+The problem is that you've created an object wrapper around the *false* value, but objects themselves are *"truthy"*, so using the object behaves oppositely to using the underlying false value itself, which is quite contrary to normal expectation.
+
+### Unboxing
+If you have an object wrapper and you want to get the underlying primitive value out, you can use the __valueOf()__ method:
+
+> var a = new String( "abc" );
+> var b = new Number( 42 );
+> var c = new Boolean( true );
+
+> a.valueOf(); // "abc"
+> b.valueOf(); // 42
+> c.valueOf(); // true
+
+Unboxing can also happen implicitly, when using an object wrapper value in a way that requires the primitive value. This process (coercion) will be covered in more detail in Chapter 4, but briefly:
+
+> var a = new String( "abc" );
+> var b = a + ""; // `b` has the unboxed primitive value "abc"
+
+> typeof a; // "object"
+> typeof b; // "string"
+
+### Natives as Constructors
+For array, object, function, and regular-expression values, it's almost universally preferred that you use the literal form for creating the values, but the literal form creates the same sort of object as the constructor form does.
+
+#### Array(..)
+> var a = new Array( 1, 2, 3 );
+> a; // [1, 2, 3]
+
+> var b = [1, 2, 3];
+> b; // [1, 2, 3
+
+Firefox reports [ , , , ] for a and c. Did you catch why that's so confusing? Look closely. Three commas implies four slots, not three slots like we'd expect.
+
+*hier is een lang stuk over alles dat niet werkt en het is nogal verwarrend*
+
+#### Object(..), Function(..), and RegExp(..)
+
+The Object(..)/Function(..)/RegExp(..) constructors are also generally optional (and thus should usually be avoided unless specifically called for):
+
+> var c = new Object();
+> c.foo = "bar";
+> c; // { foo: "bar" }
+
+> var d = { foo: "bar" };
+> d; // { foo: "bar" }
+
+> var e = new Function( "a", "return a * 2;" );
+> var f = function(a) { return a * 2; };
+> function g(a) { return a * 2; }
+
+> var h = new RegExp( "^a*b+", "g" );
+> var i = /^a*b+/g;
+
+There's practically no reason to ever use the new Object() constructor form, especially since it forces you to add properties one-by-one instead of many at once in the object literal form.
+
+The Function constructor is helpful only in the rarest of cases, where you need to dynamically define a function's parameters and/or its function body. Do not just treat Function(..) as an alternate form of eval(..). You will almost never need to dynamically define a function in this way.
+
+#### Date(..) and Error(..)
+
+The Date(..) and Error(..) native constructors are much more useful than the other natives, because there is no literal form for either. To create a date object value, you must use new Date(). The Date(..) constructor accepts optional arguments to specify the date/time to use, but if omitted, the current date/time is assumed.
+
+#### Symbol(..)
+
+New as of ES6, an additional primitive value type has been added, called "Symbol". Symbols are special "unique" values that can be used as properties on objects with little fear of any collision. 
+
+There are several predefined symbols in ES6, accessed as static properties of the Symbol function object, like Symbol.create, Symbol.iterator, etc. To use them, do something like:
+
+> obj[Symbol.iterator] = function(){ /*..*/ };
+
+### Native Prototypes
+
+Each of the built-in native constructors has its own .prototype object -- Array.prototype, String.prototype, etc.  
+These objects contain behavior unique to their particular object subtype.
+
+> NIKS KOMT BINNEN.NL
