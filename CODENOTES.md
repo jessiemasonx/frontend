@@ -24,3 +24,38 @@ __1. Parsing:__
 Taking a stream (array) of tokens and turning it into a tree of nested elements which represent the grammatical structure of the program. This tree is called __"AST"__ (Abstract Syntax Tree).
 *Example: the tree for var a = 2; might start with a top-level node called VariableDeclaration, with a child node called Indentifier*
 
+
+# You Don't Know JS: Types & Grammar
+## Chapter 1: Types
+
+### Built-in Types
+JavaScript defines seven built-in types:
+	•	null
+	•	undefined
+	•	boolean
+	•	number
+	•	string
+	•	object
+	•	symbol -- added in ES6!
+
+The typeof operator inspects the type of the given value, and always returns one of seven string values. 
+Functions are actually objects. So are Arrays.
+
+### Values as Types
+In JavaScript, variables don't have types -- values have types. Variables can hold any value, at any time.
+The value 42 has an intrinsic type of number, and its type cannot be changed. Another value, like "42" with the string type, can be created from the number value 42 through a process called __coercion__.
+
+If you use typeof against a variable, it's not asking *”what’s the type of the variable?”* as it may seem, since JS variables have no types. Instead, it's asking *”what’s the type of the __value__ in the variable?”*
+
+#### undefined vs "undeclared"
+Variables that have no value currently, actually have the undefined value. Calling typeof against such variables will return “undefined”. It's tempting for most developers to think of the word *undefined* and think of it as a synonym for *undeclared*. However, in JS, these two concepts are quite different.
+
+An __undefined__ variable is one that has been declared in the accessible scope, but at the moment has no other value in it. By contrast, an __undeclared__ variable is one that has not been formally declared in the accessible scope.
+
+var a;  
+a; // undefined  
+b; // ReferenceError: b is not defined  
+
+Here b is undeclared. 
+
+Another special behaviour: The typeof operator returns "undefined" even for "undeclared" (or "not defined") variables.
