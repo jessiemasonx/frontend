@@ -1,7 +1,6 @@
+
 ## Antwoord op Nina's vragen 
 __IIFE__ Is een functie die zichzelf gelijk invoked. Dan hoef je 'm niet aan te roepen. Hij roept zichzelf gelijk aan. (function(). 
-
-
 
 # aantekeningen les 2
 __Scope__ is waar variables worden opgeslagen. Waar je ze kan vinden. "Waar leeft een variable". Een set afspraken. Stel je hebt een functie a, en in die functie sla je een var b op. Dat betekend dat die var leeft in de scope van die functie. Dus als je een var in een functie definieert, leeft ie in de scope van die functie. Als je het in een blok definieert zit het in de globale scope. De globale scope is window. Maar die scope wordt afgeleid van de funtie window. En daarom zit je altijd in de functie scope van window.  
@@ -26,6 +25,11 @@ Taking a stream (array) of tokens and turning it into a tree of nested elements 
 
 
 # You Don't Know JS: Types & Grammar
+[Chapter 1: Types](# Chapter 1: Types)
+[Chapter 2: Values](# Chapter 2: Values)
+[Chapter 3: Natives](# Chapter 3: Natives)
+
+
 ## Chapter 1: Types
 
 ### Built-in Types
