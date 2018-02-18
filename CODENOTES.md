@@ -25,7 +25,7 @@ Taking a stream (array) of tokens and turning it into a tree of nested elements 
 
 
 # You Don't Know JS: Types & Grammar
-[chapone](# chapone)  
+[chapone](https://github.com/jessiemasonx/frontend/blob/master/CODENOTES.md#chapone)  
 [Chapter 2: Values](# Chapter 2: Values)  
 [Chapter 3: Natives](# Chapter 3: Natives)  
 
