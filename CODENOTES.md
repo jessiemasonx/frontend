@@ -25,12 +25,12 @@ Taking a stream (array) of tokens and turning it into a tree of nested elements 
 
 
 # You Don't Know JS: Types & Grammar
-[chap1](# chap1)  
+[chapone](# chapone)  
 [Chapter 2: Values](# Chapter 2: Values)  
 [Chapter 3: Natives](# Chapter 3: Natives)  
 
 
-## chap1
+## chapone
 
 ### Built-in Types
 JavaScript defines seven built-in types:
