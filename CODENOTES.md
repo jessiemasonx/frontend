@@ -25,12 +25,12 @@ Taking a stream (array) of tokens and turning it into a tree of nested elements 
 
 
 # You Don't Know JS: Types & Grammar
-[Chapter 1: Types](# Chapter 1: Types)
+[Chapter 1: Types](# Chap1)
 [Chapter 2: Values](# Chapter 2: Values)
 [Chapter 3: Natives](# Chapter 3: Natives)
 
 
-## Chapter 1: Types
+## Chap1
 
 ### Built-in Types
 JavaScript defines seven built-in types:
@@ -83,8 +83,8 @@ Nog een voorbeeld: reversing a string. Arrays have a reverse() in-place muta
 
 a.reverse;		// undefined  
 
-b.reverse();	// ["!","o","O","f"]  
-b;				// [“!","o","O","f"]
+> b.reverse();	                // ["!","o","O","f"]  
+> b;				// [“!","o","O","f"]
 
 ### Numbers
 JavaScript has just one numeric type: number. This type includes both "integer" values and fractional decimal numbers. 
@@ -94,41 +94,41 @@ Number literals are expressed in JavaScript generally as base-10 decimal literal
 
 Very large or very small numbers will by default be outputted in exponent form, the same as the output of the toExponential() method, like:
 
-var a = 5E10;  
-a;					// 50000000000  
-a.toExponential();	// "5e+10"  
+> var a = 5E10;  
+> a;					// 50000000000  
+> a.toExponential();	// "5e+10"  
 
-var b = a * a;  
-b;					// 2.5e+21  
+> var b = a * a;  
+> b;					// 2.5e+21  
 
-var c = 1 / a;  
-c;					// 2e-11  
+> var c = 1 / a;  
+> c;					// 2e-11  
 
 Number values can access methods that are built into the Number.prototype. 
 Voorbeeld: toFixed(..) method. Geeft aan met hoeveel decimalen u de waarde wilt laten weergeven:
 var a = 42.59;
 
-a.toFixed( 0 ); // "43"  
-a.toFixed( 1 ); // "42.6"  
-a.toFixed( 2 ); // "42.59"  
-a.toFixed( 3 ); // "42.590"  
-a.toFixed( 4 ); // "42.5900"
+> a.toFixed( 0 ); // "43"  
+> a.toFixed( 1 ); // "42.6"  
+> a.toFixed( 2 ); // "42.59"  
+> a.toFixed( 3 ); // "42.590"  
+> a.toFixed( 4 ); // "42.5900"
 
 toPrecision(..) lijkt er op, maar geeft aan hoe veel *significant digits* moeten worden gebruikt om de waarde aan te geven:
 var a = 42.59;
 
-a.toPrecision( 1 ); // "4e+1"  
-a.toPrecision( 2 ); // "43"  
-a.toPrecision( 3 ); // "42.6"  
-a.toPrecision( 4 ); // "42.59"  
-a.toPrecision( 5 ); // "42.590"  
-a.toPrecision( 6 ); // "42.5900"  
+> a.toPrecision( 1 ); // "4e+1"  
+> a.toPrecision( 2 ); // "43"  
+> a.toPrecision( 3 ); // "42.6"  
+> a.toPrecision( 4 ); // "42.59"  
+> a.toPrecision( 5 ); // "42.590"  
+> a.toPrecision( 6 ); // "42.5900"  
 
 number literals can also be expressed in other bases, like binary, octal, and hexadecimal:
 
-0xf3; // hexadecimal for: 243  
-0Xf3; // ditto  
-0363; // octal for: 243
+> 0xf3; // hexadecimal for: 243  
+> 0Xf3; // ditto  
+> 0363; // octal for: 243
 
 ### Small Decimal Value
 The most (in)famous side effect of using binary floating-point numbers is:
@@ -351,3 +351,7 @@ Each of the built-in native constructors has its own .prototype object -- Array.
 These objects contain behavior unique to their particular object subtype.
 
 > NIKS KOMT BINNEN.NL
+
+## Chapter 4: Coercion
+
+
