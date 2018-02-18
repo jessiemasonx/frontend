@@ -353,5 +353,252 @@ These objects contain behavior unique to their particular object subtype.
 > NIKS KOMT BINNEN.NL
 
 ## Chapter 4: Coercion
+### Converting Values
+It may not be obvious, but JavaScript coercions always result in one of the scalar primitive values, like string, number, or boolean. There is no coercion that results in a complex value like object or function. 
+
+The difference should be obvious: __explicit coercion__ is when it is obvious from looking at the code that a type conversion is intentionally occurring, whereas __implicit coercion__ is when the type conversion will occur as a less obvious side effect of some other intentional operation.
+
+For example, consider these two approaches to coercion:
+
+> var a = 42;  
+> var b = a + "";			// implicit coercion  
+> var c = String( a );           	// explicit coercion
+
+For b, the coercion that occurs happens implicitly, because the + operator combined with one of the operands being a string value ("") will insist on the operation being a *string concatenation* (adding two strings together), which as a (hidden) side effect will force the 42 value in a to be coerced to its string equivalent: "42".  
+The String(..) function makes it pretty obvious that it's explicitly taking the value in a and coercing it to a string representation.
+
+### Abstract Value Operations
+
+We need to learn the basic rules that govern how values become either a string, number, or boolean. We will specifically pay attention to: ToString, ToNumber, and ToBoolean, and to a lesser extent, ToPrimitive.
+
+#### ToString
+
+When any non-string value is coerced to a string representation, the conversion is handled by the ToString abstract operation in section 9.8 of the specification.
+> a.toString(); // "1.07e21" 
+> het zet er haakjes omheen. maakt het dus een string
+
+__JSON Stringification__
+
+Another task that seems awfully related to ToString is when you use the JSON.stringify(..) utility to serialize a value to a JSON-compatible string value.For most simple values, JSON stringification behaves basically the same as toString() conversions, except that the serialization result is always a string:
+
+> JSON.stringify( 42 );	// "42"  
+> JSON.stringify( "42" );	// ""42"" (a string with a quoted string value in it)
+
+> __JSON.stringify(..) ??__
+
+### ToNumber
+
+For example, true becomes 1 and false becomes 0. undefined becomes NaN, but (curiously) null becomes 0.
+
+> var c = [4,2];  
+> c.toString = function(){  
+> 	return this.join( "" );	// "42"  
+> };
+>   
+> Number( c );			// 42  
+> Number( "" );			// 0  
+> Number( [] );			// 0  
+> Number( [ "abc" ] );	// NaN
+
+### ToBoolean
+
+First and foremost, JS has actual keywords true and false, and they behave exactly as you'd expect of boolean values. It's a common misconception that the values 1 and 0 are identical to true/false. While that may be true in other languages, in JS the numbers are numbers and the booleans are booleans. You can coerce 1 to true (and vice versa) or 0 to false (and vice versa). But they're not the same.
+
+> var a = new Boolean( false );  
+> var b = new Number( 0 );  
+> var c = new String( "" );  
+We know all three values here are objects (see Chapter 3) wrapped around obviously falsy values. But do these objects behave > as true or as false? That's easy to answer:  
+>   
+> var d = Boolean( a && b && c );  
+>  
+> d; // true  
+
+So, all three behave as true, as that's the only way d could end up as true.
+
+## Explicit Coercion
+
+__Explicit coercion__ refers to type conversions that are obvious and explicit. There's a wide range of type conversion usage that clearly falls under the explicit coercion category for most developers.
+
+### Explicitly: Strings <--> Numbers
+
+To coerce between strings and numbers, we use the built-in String(..) and Number(..) functions, but very importantly, we do not use the new keyword in front of them. As such, we're not creating object wrappers.
+
+Instead, we're actually explicitly coercing between the two types:
+
+> var a = 42;  
+> var b = String( a );  
+>  
+> var c = "3.14";  
+> var d = Number( c );  
+  
+> b; // "42"  
+> d; // 3.14  
+
+I call this __explicit coercion__ because in general, it's pretty obvious to most developers that the end result of these operations is the applicable type conversion.
+
+Besides String(..) and Number(..), there are other ways to "explicitly" convert these values between string and number:
+
+>  var a = 42;  
+>  var b = a.toString();  
+>  
+>  var c = "3.14";  
+>  var d = +c;  
+>  
+>  b; // "42"  
+>  d; // 3.14  
+
++c here is showing the unary operator form (operator with only one operand) of the + operator. Instead of performing mathematic addition (or string concatenation -- see below), the unary + explicitly coerces its operand (c) to a number value. 
+Is +c explicit coercion? Depends on your experience and perspective. If you know that unary + is explicitly intended for number coercion, then it's pretty explicit and obvious. However, if you've never seen it before, it can seem awfully confusing, implicit, with hidden side effects, etc.
+
+### Date To number
+
+Another common usage of the unary + operator is to coerce a Date object into a number, because the result is the unix timestamp *(milliseconds elapsed since 1 January 1970 00:00:00 UTC)* representation of the date/time value:
+
+> var d = new Date( "Mon, 18 Aug 2014 08:53:06 CDT" );  
+> +d; // 1408369986000
+
+The most common usage of this idiom is to get the current now moment as a timestamp, such as:
+
+> var timestamp = +new Date();
+
+__The Curious Case of the ~__
+
+One coercive JS operator that is often overlooked and usually very confused is the tilde ~ operator.  
+Using bitwise operators (like | or ~) with certain special number values produces a coercive effect that results in a different number value.  
+
+For example, let's first consider the | "bitwise OR" operator used in the otherwise no-op idiom 0 | x, which (as Chapter 2 showed) essentially only does the ToInt32 conversion:
+
+> 0 | -0;			// 0  
+> 0 | NaN;		// 0  
+> 0 | Infinity;	// 0  
+> 0 | -Infinity;	// 0  
+
+So, let's turn our attention back to ~. The ~ operator first "coerces" to a 32-bit number value, and then performs a bitwise negation (flipping each bit's parity).  
+This is very similar to how ! not only coerces its value to boolean but also flips its parity.
+
+
+Let's try again: ~x is roughly the same as -(x+1). That's weird, but slightly easier to reason about. So:
+
+> ~42;	// -(42+1) ==> -43  
+
+t's pretty common to try to use indexOf(..) not just as an operation to get the position, but as a boolean check of presence/absence of a substring in another string. Here's how developers usually perform such checks: 
+
+> var a = "Hello World";  
+  
+> if (a.indexOf( "lo" ) >= 0) {	// true  
+> 	// found it!  
+
+There's one more place ~ may show up in code you run across: some developers use the double tilde ~~ to truncate the decimal part of a number (i.e., "coerce" it to a whole number "integer"). It's commonly (though mistakingly) said this is the same result as calling Math.floor(..).
+
+### Explicitly: Parsing Numeric Strings
+
+A similar outcome to coercing a string to a number can be achieved by __parsing__ a number out of a string's character contents. There are, however, distinct differences between this parsing and the type conversion we examined above.
+
+> var a = "42";  
+> var b = "42px";  
+>   
+> Number( a );	// 42  
+> parseInt( a );	// 42  
+>  
+> Number( b );	// NaN  
+> parseInt( b );	// 42  
+
+Parsing should not be seen as a substitute for coercion. These two tasks, while similar, have different purposes. Parse a string as a number when you don't know/care what other non-numeric characters there may be on the right-hand side. Coerce a string (to a number) when the only acceptable values are numeric and something like "42px" should be rejected as a number.
+
+#### Parsing Non-Strings
+
+One somewhat infamous example of parseInt(..)'s behavior is highlighted in a sarcastic joke post a few years ago, poking fun at this JS behavior:
+
+>  parseInt( 1/0, 19 ); // 18
+
+> heeel veel overgeslagen want snap t niet
+
+### Explicitly: * --> Boolean
+
+Just like with String(..) and Number(..) above, Boolean(..) is an explicit way of forcing the ToBoolean coercion:
+
+> var a = "0";  
+> var b = [];  
+> var c = {};  
+>  
+> var d = "";  
+> var e = 0;  
+> var f = null;  
+> var g;  
+>  
+> Boolean( a ); // true  
+> Boolean( b ); // true  
+> Boolean( c ); // true  
+> 
+> Boolean( d ); // false  
+> Boolean( e ); // false  
+> Boolean( f ); // false  
+> Boolean( g ); // false  
+
+### Implicit Coercion
+
+Implicit coercion refers to type conversions that are hidden, with non-obvious side-effects that implicitly occur from other actions. In other words, implicit coercions are any type conversions that aren't obvious (to you).
+
+#### Simplifying Implicitly
+
+Before we even get to JavaScript, let me suggest something pseudo-code'ish from some theoretical strongly typed language to illustrate:
+
+> SomeType x = SomeType( AnotherType( y ) )
+
+In this example, I have some arbitrary type of value in y that I want to convert to the SomeType type. The problem is, this language can't go directly from whatever y currently is to SomeType. It needs an intermediate step, where it first converts to AnotherType, and then from AnotherType to SomeType.
+
+Now, what if that language (or definition you could create yourself with the language) did just let you say:
+
+> SomeType x = SomeType( y )
+
+Wouldn't you generally agree that we simplified the type conversion here to reduce the unnecessary "noise" of the intermediate conversion step?
+
+> ?  
+> ?  
+> ???????
+
+#### Implicitly: Strings <--> Numbers
+
+Earlier in this chapter, we explored explicitly coercing between string and number values. Now, let's explore the same task but with implicit coercion approaches.
+
+The + operator is overloaded to serve the purposes of both number addition and string concatenation. So how does JS know which type of operation you want to use? Consider:
+> var a = "42";  
+> var b = "0";  
+> var c = 42;  
+> var d = 0;  
+>  
+> a + b; // "420"  
+> c + d; // 42  
+
+What's different that causes "420" vs 42? It's a common misconception that the difference is whether one or both of the operands is a string, as that means + will assume string concatenation. While that's partially true, it's more complicated than that.
+
+You can coerce a number to a string simply by "adding" the number and the "" empty string:
+
+> var a = 42;  
+> var b = a + "";  
+>  
+> b; // "42"
+
+What about the other direction? How can we implicitly coerce from string to number?
+
+> var a = "3.14";  
+> var b = a - 0;  
+>   
+> b; // 3.14  
+
+What about object values with the - operator? Similar story as for + above:
+
+> var a = [3];  
+> var b = [1];  
+>  
+> a - b; // 2  
+
+### Implicitly: Booleans --> Numbers
+
+
+
+
+
+
 
 
