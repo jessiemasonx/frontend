@@ -962,3 +962,358 @@ logisch tochh
 
 a and b are not coerced to numbers, because both of them end up as strings after the ToPrimitive coercion on the two arrays. So, "42" is compared character by character to "043", starting with the first characters "4" and "0", respectively. Since "0" is lexicographically less than than "4", the comparison returns false.
 
+
+## Chapter 5: Grammar
+
+### Statements & Expressions
+
+Statements are sentences, expressions are phrases, and operators are conjunctions/punctuation.
+
+> var a = 3 * 6;  
+> var b = a;  
+> b;  
+
+In this snippet, 3 * 6 is an expression (evaluates to the value 18). But a on the second line is also an expression, as is b on the third line. The a and b expressions both evaluate to the values stored in those variables at that moment, which also happens to be 18.
+
+#### Statement Completion Values
+
+Let's consider var b = a. What's the completion value of that statement?
+
+The b = a assignment expression results in the value that was assigned (18 above), but the var statement itself results in undefined. Why? Because var statements are defined that way in the spec. If you put var a = 42; into your console, you'll see undefined reported back instead of 42.
+
+> var b;  
+>    
+> if (true) {  
+> 	b = 4 + 38;  
+> }  
+
+If you typed that into your console/REPL, you'd probably see 42 reported, since 42 is the completion value of the if block, which took on the completion value of its last assignment expression statement b = 4 + 38.
+
+In other words, the completion value of a block is like an __implicit return__ of the last statement value in the block.
+
+This kind of code doesn't work:
+
+> var a, b;  
+>   
+> a = if (true) {  
+> 	b = 4 + 38;  
+> };  
+
+We can't capture the completion value of a statement and assign it into another variable in any easy syntactic/grammatical way. So, what can we do?
+
+There's a proposal for ES7 called "do expression." Here's how it might work:
+
+> var a, b;  
+>   
+> a = do {  
+> 	if (true) {  
+> 		b = 4 + 38;  
+> 	}  
+> };
+>  
+> a;	// 42
+
+#### Expression Side Effects
+
+Most expressions don't have side effects. For example:
+
+> var a = 2;  
+> var b = a + 3;  
+
+The expression a + 3 did not itself have a side effect, like for instance changing a. It had a result, which is 5, and that result was assigned to b in the statement b = a + 3.
+
+The most common example of an expression with (possible) side effects is a function call expression:
+
+> function foo() {  
+> 	a = a + 1;  
+> }
+> 
+> var a = 1;
+> foo();		// result: `undefined`, side effect: changed `a`
+
+-----
+
+The expression a++ has two separate behaviors. First, it returns the current value of a, which is 42 (which then gets assigned to b). But next, it changes the value of a itself, incrementing it by one.
+
+> var a = 42;  
+> var b = a++;  
+>  
+> a;	// 43  
+b;	// 42  
+
+Many developers would mistakenly believe that b has value 43 just like a does. But the confusion comes from not fully considering the when of the side effects of the ++ operator.
+
+There's an option, though: the , statement-series comma operator. This operator allows you to string together multiple standalone expression statements into a single statement:
+
+> var a = 42, b;  
+> b = ( a++, a );  
+>   
+> a;	// 43  
+> b;	// 43  
+
+Another example of a side-effecting operator is delete. As we showed in Chapter 2, delete is used to remove a property from an object or a slot from an array. But it's usually just called as a standalone statement:
+
+> var obj = {  
+> 	a: 42  
+> };  
+>    
+> obj.a;			// 42  
+> delete obj.a;	// true 
+> obj.a;			// undefined 
+
+#### Contextual Rules
+
+There are quite a few places in the JavaScript grammar rules where the same syntax means different things depending on where/how it's used. This kind of thing can, in isolation, cause quite a bit of confusion.
+
+##### { .. } Curly Braces
+
+There's two main places that a pair of { .. } curly braces will show up in your code. Let's take a look at each of them.
+
+__Object Literals__
+
+
+> // assume there's a `bar()` function defined  
+>   
+> var a = {   
+> 	foo: bar()  
+> };  
+
+How do we know this is an object literal? Because the { .. } pair is a value that's getting assigned to a.
+
+__Labels__  
+
+What happens if we remove the var a = part of the above snippet?
+
+> // assume there's a `bar()` function defined  
+>   
+> {  
+> 	foo: bar()   
+> }  
+
+A lot of developers assume that the { .. } pair is just a standalone object literal that doesn't get assigned anywhere. But it's actually entirely different.
+
+Here, { .. } is just a regular code block. The { .. } code block here is functionally pretty much identical to the code block being attached to some statement, like a for/while loop, if conditional, etc.
+
+##### Blocks
+Another commonly cited JS gotcha (related to coercion -- see Chapter 4) is:
+
+> [] + {}; // "[object Object]"  
+> {} + []; // 0  
+
+This seems to imply the + operator gives different results depending on whether the first operand is the [] or the {}. But that actually has nothing to do with it!
+
+##### Object Destructuring
+Another place that you'll see { .. } pairs showing up is with "destructuring assignments" , specifically object destructuring. Consider:
+
+> function getData() {  
+> 	// ..  
+> 	return {  
+> 		a: 42,  
+>		b: "foo"  
+>	};  
+> }  
+
+As you can probably tell, var { a , b } = .. is a form of ES6 destructuring assignment, which is roughly equivalent to:
+
+> var res = getData();  
+> var a = res.a;  
+> var b = res.b;  
+>  
+> var { a, b } = getData();  
+>  
+> console.log( a, b ); // 42 "foo"  
+ 
+#### else if And Optional Blocks
+
+It's a common misconception that JavaScript has an else if clause, because you can do:
+
+> if (a) {  
+> 	// ..  
+> }  
+> else if (b) {  
+> 	// ..  
+> }  
+> else {  
+> 	// ..  
+> }  
+
+But there's a hidden characteristic of the JS grammar here: there is no else if. But if and else statements are allowed to omit the { } around their attached block if they only contain a single statement. 
+
+### Operator Precedence
+
+example from above:
+
+> var a = 42, b;  
+> b = ( a++, a );  
+>  
+> a;	// 43  
+> b;	// 43  
+
+But what would happen if we remove the ( )?
+
+> var a = 42, b;  
+> b = a++, a;  
+>  
+> a;	// 43  
+> b;	// 42  
+
+#### Short Circuited
+
+For both && and || operators, the right-hand operand will not be evaluated if the left-hand operand is sufficient to determine the outcome of the operation. Hence, the name "short circuited".
+
+For example, with a && b, b is not evaluated if a is falsy, because the result of the && operand is already certain, so there's no point in bothering to check b. Likewise, with a || b, if a is truthy, the result of the operand is already certain, so there's no reason to check b.
+
+This short circuiting can be very helpful and is commonly used:
+
+> function doSomething(opts) {  
+> 	if (opts && opts.cool) {  
+> 		// ..  
+> 	}  
+> }  
+
+#### Tighter Binding
+
+Does the ? : operator have more or less precedence than the && and || operators?
+
+> a && b || c ? c || b ? a : c && b : a  
+
+I that more like this:
+
+> a && b || (c ? c || (b ? a : c) && b : a)
+
+or this?
+
+> (a && b || c) ? (c || b) ? a : (c && b) : a
+
+The answer is the second one. But why?  
+Because && is more precedent than ||, and || is more precedent than ? :.
+
+#### Associativity
+
+But what about multiple operators of the same precedence? Do they always process left-to-right or right-to-left?
+
+It's important to note that associativity is not the same thing as left-to-right or right-to-left processing.
+
+> var a = foo() && bar();
+
+Here, foo() is evaluated first, and then possibly bar() depending on the result of the foo() expression. That definitely could result in different program behavior than if bar() was called before foo().
+
+But this behavior is just left-to-right processing. It has nothing to do with the associativity of &&. In that example, since there's only one && and thus no relevant grouping here, associativity doesn't even come into play.
+
+But that's not always the case. Some operators would behave very differently depending on left-associativity vs. right-associativity.
+
+Consider the ? : ("ternary" or "conditional") operator:
+
+> a ? b : c ? d : e;
+
+__? :__ is right-associative, so which grouping represents how it will be processed?
+
+> a ? b : (c ? d : e)
+
+The right-associativity here actually matters, as (a ? b : c) ? d : e will behave differently for some (but not all!) combinations of values.
+
+#### Disambiguation
+
+We should mix both operator precedence/associativity and ( ) manual grouping into our programs -- I argue the same way in Chapter 4 for healthy/safe usage of implicit coercion, but certainly don't endorse it exclusively without bounds.
+
+For example, if (a && b && c) .. is perfectly OK to me, and I wouldn't do if ((a && b) && c) .. just to explicitly call out the associativity, because I think it's overly verbose.
+
+### Automatic Semicolons
+
+ASI (Automatic Semicolon Insertion) is when JavaScript assumes a ; in certain places in your JS program even if you didn't put one there. Because if you omit even a single required ; your program would fail. Not very forgiving. ASI allows JS to be tolerant of certain places where ; aren't commonly thought to be necessary. But the semicolons are not inserted in the middle of a line.
+
+Consider:
+> var a = 42, b  
+> c;
+
+Should JS treat the c on the next line as part of the var statement? It certainly would if a , had come anywhere (even another line) between b and c. But since there isn't one, JS assumes instead that there's an implied ; (at the newline) after b. Thus, c; is left as a standalone expression statement.
+
+#### Error Correction
+
+Most, but not all, semicolons are optional, but the two ;s in the for ( .. ) .. loop header are required.
+
+Let me just share my perspective. A strict reading of the spec implies that ASI is an "error correction" routine. What kind of error, you may ask? Specifically, a parser error. In other words, in an attempt to have the parser fail less, ASI lets it be more tolerant.
+
+My take: __use semicolons wherever you know they are "required," and limit your assumptions about ASI to a minimum.__
+
+### Errors
+
+Not only does JavaScript have different subtypes of errors (TypeError, ReferenceError, SyntaxError, etc.), but also the grammar defines certain errors to be enforced at compile time, as compared to all other errors that happen during runtime.
+
+One simple example is with syntax inside a regular expression literal. There's nothing wrong with the JS syntax here, but the invalid regex will throw an early error:
+
+> var a = /+foo/;		// Error!
+
+ES5's strict mode defines even more early errors. For example, in strict mode, function parameter names cannot be duplicated:
+
+> function foo(a,b,a) { }					// just fine  
+>  
+> function bar(a,b,a) { "use strict"; }	// Error!  
+
+#### Using Variables Too Early
+
+ES6 defines a new concept called the __TDZ__ ("Temporal Dead Zone").
+
+The TDZ refers to places in code where a variable reference cannot yet be made, because it hasn't reached its required initialization.
+
+The most clear example of this is with ES6 let block-scoping:
+
+> {  
+> 	a = 2;		// ReferenceError!  
+>	let a;  
+> }  
+
+The assignment a = 2 is accessing the a variable (which is indeed block-scoped to the { .. } block) before it's been initialized by the let a declaration, so it's in the TDZ for a and throws an error.
+
+### Function Arguments
+
+Another example of a TDZ violation can be seen with ES6 default parameter values:
+
+> var b = 3;  
+>   
+> function foo( a = 42, b = a + b + 5 ) {  
+> 	// ..  
+> }
+
+The b reference in the assignment would happen in the TDZ for the parameter b (not pull in the outer b reference), so it will throw an error. However, the a in the assignment is fine since by that time it's past the TDZ for parameter a.
+
+#### try..finally
+
+The code in the finally clause always runs (no matter what), and it always runs right after the try (and catch if present) finish, before any other code runs. In one sense, you can kind of think of the code in a finally clause as being in a callback function that will always be called regardless of how the rest of the block behaves.
+
+So what happens if there's a return statement inside a try clause? It obviously will return a value, right? But does the calling code that receives that value run before or after the finally?
+
+> function foo() {  
+> 	try {  
+> 		return 42;  
+> 	}  
+> 	finally {  
+> 		console.log( "Hello" );  
+> 	}  
+>  
+> 	console.log( "never runs" );  
+> }  
+>  
+> console.log( foo() );  
+> // Hello  
+> // 42  
+
+The return 42 runs right away, which sets up the completion value from the foo() call. This action completes the try clause and the finally clause immediately runs next. Only then is the foo() function complete, so that its completion value is returned back for the console.log(..) statement to use.
+
+
+#### switch
+
+Let's briefly explore the switch statement, a sort-of syntactic shorthand for an if..else if..else.. statement chain.
+
+> switch (a) {  
+> 	case 2:  
+> 		// do something  
+> 		break;  
+> 	case 42:  
+> 		// do another thing    
+> 		break;  
+> 	default:  
+> 		// fallback to here  
+> }  
+
+As you can see, it evaluates a once, then matches the resulting value to each case expression (just simple value expressions here). If a match is found, execution will begin in that matched case, and will either go until a break is encountered or until the end of the switch block is found.
