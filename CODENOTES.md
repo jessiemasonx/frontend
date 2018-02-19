@@ -30,7 +30,7 @@ Taking a stream (array) of tokens and turning it into a tree of nested elements 
 [Chapter 3: Natives](# Chapter 3: Natives)  
 
 
-## chapone
+## Chapter 1: Types
 
 ### Built-in Types
 JavaScript defines seven built-in types:
