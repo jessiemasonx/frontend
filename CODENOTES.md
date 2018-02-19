@@ -353,6 +353,8 @@ These objects contain behavior unique to their particular object subtype.
 > NIKS KOMT BINNEN.NL
 
 ## Chapter 4: Coercion
+
+> snap function onlyOne(a,b,c) niet
 ### Converting Values
 It may not be obvious, but JavaScript coercions always result in one of the scalar primitive values, like string, number, or boolean. There is no coercion that results in a complex value like object or function. 
 
@@ -595,10 +597,365 @@ What about object values with the - operator? Similar story as for + above:
 
 ### Implicitly: Booleans --> Numbers
 
+Ik denk dat een geval waarin __implicit coercion__ echt kan schijnen, het vereenvoudigen van bepaalde typen gecompliceerde boolean logica in eenvoudige numerieke optelling is. Dit is natuurlijk geen algemene techniek, maar een specifieke oplossing voor specifieke gevallen.
+ 
+> function onlyOne(a,b,c) {  
+> 	return !!((a && !b && !c) ||  
+> 		(!a && b && !c) || (!a && !b && c));  
+> }  
+>  
+> var a = true;  
+> var b = false;  
+>   
+> onlyOne( a, b, b );	// true  
+> onlyOne( b, a, b );	// true  
+>  
+> onlyOne( a, b, a );	// false  
+
+This __onlyOne(..)__ utility should only return true if exactly one of the arguments is true / truthy. It's using __implicit coercion__ on the truthy checks and explicit coercion on the others, including the final return value.
+
+But what if we needed that utility to be able to handle four, five, or twenty flags in the same way? Here's where coercing the boolean values to numbers (0 or 1, obviously) can greatly help:
+
+> for (var i=0; i < arguments.length; i++) {  
+> 		// skip falsy values. same as treating   
+> 		// them as 0's, but avoids NaN's.  
+> 		if (arguments[i]) {  
+> 			sum += arguments[i];  
+> 		}
+
+What we're doing here is relying on the 1 for true/truthy coercions, and numerically adding them all up. sum += arguments[i] uses implicit coercion to make that happen. If one and only one value in the arguments list is true, then the numeric sum will be 1, otherwise the sum will not be 1 and thus the desired condition is not met.
+
+We could of course do this with explicit coercion instead:
+
+> function onlyOne() {
+> 	var sum = 0;
+> 	for (var i=0; i < arguments.length; i++) {
+> 		sum += Number( !!arguments[i] );
+> 	}
+> 	return sum === 1;
+> }
+
+We first use !!arguments[i] to force the coercion of the value to true or false. That's so you could pass non-boolean values in, like onlyOne( "42", 0 ), and it would still work as expected (otherwise you'd end up with string concatenation and the logic would be incorrect).  
+Once we're sure it's a boolean, we do another explicit coercion with Number(..) to make sure the value is 0 or 1.
+
+### Implicitly: * --> Boolean
+
+What sort of expression operations require/force (implicitly) a boolean coercion?
+
+1. The test expression in an if (..) statement.
+2. The test expression (second clause) in a for ( .. ; .. ; .. ) header.
+3. The test expression in while (..) and do..while(..) loops.
+4. The test expression (first clause) in ? : ternary expressions.
+5. The left-hand operand (which serves as a test expression -- see below!) to the || ("logical or") and && ("logical and") operators.
+
+Any value used in these contexts that is not already a boolean will be implicitly coerced to a boolean using the rules of the ToBoolean abstract operation covered earlier.
+
+var a = 42;
+var b = "abc";
+var c;
+var d = null;
+
+
+> if (a) {  
+> 	console.log( "yep" );		// yep  
+> }  
+>    
+> while (c) {  
+> 	console.log( "nope, never runs" );  
+> }  
+>  
+> c = d ? a : b;  
+> c;					// "abc"  
+>  
+> if ((a && d) || c) {  
+> 	console.log( "yep" );		// yep  
+> }  
 
 
 
+In all these contexts, the non-boolean values are implicitly coerced to their boolean equivalents to make the test decisions.
+
+### Operators || and &&
+
+__||__ logical or  
+__&&__ logical and
+
+I'd call them "selector operators," or more completely, "operand selector operators". Because they don't actually result in a logic value (aka boolean) in JavaScript, as they do in some other languages.  
+They result in the value of one (and only one) of their two operands. In other words, they __select one of the two operand's values__.
+
+> var a = 42;  
+> var b = "abc";  
+> var c = null;  
+>  
+> a || b;		// 42  
+> a && b;		// "abc"  
+>  
+> c || b;		// "abc"  
+> c && b;		// null  
+
+__Wait, what!?__.  In languages like C and PHP, those expressions result in true or false, but in JS, the result comes from the values themselves.
+
+For the || operator, if the test is true, the || expression results in the value of the first operand (a or c). If the test is false, the || expression results in the value of the second operand (b).  
+Inversely, for the && operator, if the test is true, the && expression results in the value of the second operand (b). If the test is false, the && expression results in the value of the first operand (a or c).
+
+> I don't get when it's true and when it's false..
+
+> a || b;  
+> // roughly equivalent to:  
+> a ? a : b;  
+>  
+> a && b;  
+> // roughly equivalent to:  
+> a ? b : a;  
+
+An extremely common and helpful usage of this behavior, which there's a good chance you may have used before and not fully understood, is:
+
+> function foo(a,b) {  
+> 	a = a || "hello";  
+> 	b = b || "world";  
+>  
+> 	console.log( a + " " + b );  
+> }  
+>   
+> foo();					// "hello world"  
+> foo( "yeah", "yeah!" );	// "yeah yeah!"  
+
+The a = a || "hello" idiom (sometimes said to be JavaScript's version of the C# "null coalescing operator") acts to test a and if it has no value (or only an undesired falsy value), provides a backup default value ("hello").
+
+What about &&?
+
+The && operator "selects" the second operand if and only if the first operand tests as truthy, and this usage is sometimes called the "guard operator" -- the first expression test "guards" the second expression:
+
+> function foo() {  
+> 	console.log( a );  
+> }  
+> var a = 42;  
+> a && foo(); // 42  
+
+OK, so || and && have some neat tricks up their sleeve, as long as you're willing to allow the implicit coercion into the mix.
+
+### Symbol Coercion
+
+*Explicit coercion* of a symbol to a string is allowed, but *implicit coercion* of the same is disallowed and throws an error.
+
+> var s1 = Symbol( "cool" );  
+> String( s1 );					// "Symbol(cool)"  
+>   
+> var s2 = Symbol( "not cool" );  
+> s2 + "";						// TypeError  
+
+> het onderste is dus implicit want hij doet die + ""
+
+Symbol values kunnen nooit *coercen* naar een number (geeft altijd error), maar gek genoeg kunnen ze allebei *explicitly* en *implicitly coercen* naar boolean (altijd true).
+
+### Loose Equals vs. Strict Equals
+
+Loose equals is the == operator, and strict equals is the === operator. Both operators are used for comparing two values for "equality," but the "loose" vs. "strict" indicates a very important difference in behavior between the two, specifically in how they decide "equality."
+
+The correct description is: "== allows coercion in the equality comparison and === disallows coercion."
+
+#### Equality Performance
+
+If you're comparing two values of the same types, == and === use the identical algorithm, and so other than minor differences in engine implementation, they should do the same work. If you're comparing two values of different types, the performance isn't the important factor. What you should be asking yourself is: when comparing these two values, do I want coercion or not?    
+If you want coercion, use == loose equality, but if you don't want coercion, use === strict equality.
+
+#### Abstract Equality
+
+Some minor exceptions to normal expectation to be aware of:
+
+- NaN is never equal to itself   
+- +0 and -0 are equal to each other 
+
+##### Comparing: strings to numbers
+
+To illustrate == coercion, let's first build off the string and number examples earlier in this chapter:
+
+> var a = 42;  
+> var b = "42";  
+>  
+> a === b;	// false  
+> a == b;	// true  
+
+But exactly what kind of coercion happens here? Does the a value of 42 become a string, or does the b value of "42" become a number?
+
+In the ES5 spec, clauses 11.9.3.4-5 say:
+
+> If Type(x) is Number and Type(y) is String, return the result of the comparison x == ToNumber(y).
+> If Type(x) is String and Type(y) is Number, return the result of the comparison ToNumber(x) == y.
+
+##### Comparing: anything to boolean
+
+One of the biggest gotchas with the implicit coercion of == loose equality pops up when you try to compare a value directly to true or false.
+
+> var a = "42";  
+> var b = true;  
+>  
+> a == b;	// false  
+
+Reason:  
+> If Type(x) is Boolean, return the result of the comparison ToNumber(x) == y.
+> If Type(y) is Boolean, return the result of the comparison x == ToNumber(y).
+
+> Ze zetten de boolean in een nummer. Dus true wordt 1 en false wordt 0. Dus eigenlijk doen ze nu "42" == 1. En das dus false.
+
+#### Comparing: nulls to undefineds
+
+> If x is null and y is undefined, return true.  
+> If x is undefined and y is null, return true.   
+
+Null and undefined, when compared with == loose equality, equate to (aka coerce to) each other (as well as themselves, obviously), and no other values in the entire language.
+
+What this means is that null and undefined can be treated as indistinguishable for comparison purposes, if you use the == loose equality operator to allow their mutual implicit coercion.
+
+var a = null;
+var b;
+
+> a == b;	// true  
+> a == null;	// true  
+> b == null;	// true  
+>    
+> a == false;	// false  
+> b == false;	// false  
+> a == "";	// false  
+
+alleen null en undefined zijn dus samen true
+
+> var a = doSomething();  
+>   
+> if (a == null) {  
+> 	// ..  
+> }  
+
+The a == null check will pass only if doSomething() returns either null or undefined, and will fail with any other value, even other falsy values like 0, false, and "".
+
+##### Comparing: objects to non-objects
+If an object/function/array is compared to a simple scalar primitive (string, number, or boolean), the ES5 spec says in clauses 11.9.3.8-9:
+
+> If Type(x) is either String or Number and Type(y) is Object, return the result of the comparison x == ToPrimitive(y).
+> If Type(x) is Object and Type(y) is either String or Number, return the result of the comparison ToPrimitive(x) == y.
+
+> var a = 42;  
+> var b = [ 42 ];  
+>  
+> a == b;// true  
+
+The [ 42 ] value has its ToPrimitive abstract operation called (see the "Abstract Value Operations" section earlier), which results in the "42" value. From there, it's just 42 == "42", which as we've already covered becomes 42 == 42, so a and b are found to be coercively equal.
+
+The __null__ and __undefined__ values cannot be boxed -- they have no object wrapper equivalent -- so Object(null) is just like Object() in that both just produce a normal object.
+
+#### Edge Cases
+
+Let's try to call out the worst, craziest corner cases so we can see what we need to avoid to not get bitten with coercion bugs.
+
+##### A Number By Any Other Value Would...
+
+> Number.prototype.valueOf = function() {  
+> 	return 3;  
+> };  
+>  
+> new Number( 2 ) == 3;	// true  
+
+Evil, huh? Of course it is. No one should ever do such a thing. 
+
+Next, let's consider another tricky example, which takes the evil from the previous example to another level:
+
+> if (a == 2 && a == 3) {  
+> 	// ..  
+> }
+
+You might think this would be impossible, because a could never be equal to both 2 and 3 *at the same time*. But "at the same time" is inaccurate, since the first expression a == 2 happens strictly before a == 3.
+
+##### False-y Comparisons
+
+The most common complaint against implicit coercion in == comparisons comes from how falsy values behave surprisingly when compared to each other.
 
 
+> "0" == null;			// false  
+> "0" == undefined;		// false  
+> "0" == false;			// true -- UH OH!  
+> "0" == NaN;				// false  
+> "0" == 0;				// true  
+> "0" == "";				// false  
+>  
+> false == null;			// false  
+> false == undefined;		// false  
+> false == NaN;			// false  
+> false == 0;				// true -- UH OH!  
+> false == "";			// true -- UH OH!  
+> false == [];			// true -- UH OH!  
+> false == {};			// false  
+>  
+> "" == null;				// false  
+> "" == undefined;		// false   
+> "" == NaN;				// false  
+> "" == 0;				// true -- UH OH!  
+> "" == [];				// true -- UH OH!  
+> "" == {};				// false  
+>  
+> 0 == null;				// false  
+> 0 == undefined;			// false  
+> 0 == NaN;				// false  
+> 0 == [];				// true -- UH OH!  
+> 0 == {};				// false  
 
+##### The Crazy Ones
+
+We don't have to stop there, though. We can keep looking for even more troublesome coercions:
+
+> [] == ![];		// true
+
+What do we know about the ! unary operator? It explicitly coerces to a boolean using the ToBoolean rules (and it also flips the parity). So before [] == ![] is even processed, it's actually already translated to [] == false. We already saw that form in our above list (false == []), so its surprise result is not new to us.
+
+> 2 == [2];		// true   
+> "" == [null];	// true
+
+You could rightly make the case that since String(null) becomes "null", then String([null]) should also become "null". That's a reasonable assertion. So, that's the real culprit.
+
+> heeeel veel rare code dingetjes waar je bij denkt WHY
+
+##### Sanity Check
+
+We have a list of coercions that are totally sane and explainable.
+
+> Denk nog ff aan die lijst van hiervoor..
+
+Four of the seven items on this list involve == false comparison, which we said earlier you should always, always avoid. That's a pretty easy rule to remember.
+
+Now the list is down to three.
+
+> "" == 0;				// true -- UH OH!  
+> "" == [];				// true -- UH OH!  
+> 0 == [];				// true -- UH OH!  
+
+##### Safely Using Implicit Coercion
+
+hTe most important advice I can give you: examine your program and reason about what values can show up on either side of an == comparison. To effectively avoid issues with such comparisons, here's some heuristic rules to follow:
+
+1. If either side of the comparison can have true or false values, don't ever, EVER use ==.
+2. If either side of the comparison can have [], "", or 0 values, seriously consider not using ==.
+
+##### Being more explicit/verbose in these cases will save you from a lot of headaches.
+
+The question of == vs. === is really appropriately framed as: should you allow coercion for a comparison or not?
+
+In the overall scheme of things, there's relatively few cases where implicit coercion is truly dangerous. But in those places, for safety sake, definitely use ===.
+
+### Abstract Relational Comparison
+
+While this part of implicit coercion often gets a lot less attention, it's important nonetheless to think about what happens with a < b comparisons).
+
+> var a = [ 42 ];  
+> var b = [ "43" ];  
+>   
+> a < b;	// true  
+> b < a;	// false  
+
+logisch tochh
+
+> var a = [ "42" ];  
+> var b = [ "043" ];  
+>   
+>  a < b;	// false  
+
+a and b are not coerced to numbers, because both of them end up as strings after the ToPrimitive coercion on the two arrays. So, "42" is compared character by character to "043", starting with the first characters "4" and "0", respectively. Since "0" is lexicographically less than than "4", the comparison returns false.
 
