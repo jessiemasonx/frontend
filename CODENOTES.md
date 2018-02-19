@@ -29,9 +29,8 @@ Taking a stream (array) of tokens and turning it into a tree of nested elements 
 - [Chapter 1: Types](https://github.com/jessiemasonx/frontend/blob/master/CODENOTES.md#chapter-1-types)  
 - [Chapter 2: Values](https://github.com/jessiemasonx/frontend/blob/master/CODENOTES.md#chapter-2-values)  
 - [Chapter 3: Natives](https://github.com/jessiemasonx/frontend/blob/master/CODENOTES.md#chapter-3-natives)    
-- [Chapter 4: Coercion](https://github.com/jessiemasonx/frontend/blob/master/CODENOTES.md#chapter-4-coercion)    
-
-
+- [Chapter 4: Coercion](https://github.com/jessiemasonx/frontend/blob/master/CODENOTES.md#chapter-4-coercion) 
+- [Chapter 5: Grammar](https://github.com/jessiemasonx/frontend/blob/master/CODENOTES.md#chapter-5-grammar)    
 
 ## Chapter 1: Types
 
