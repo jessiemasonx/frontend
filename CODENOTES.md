@@ -1,3 +1,7 @@
+#### Tips bij het lezen
+- per hoofdstuk kijken
+- kijken of dat overeen komt met conclusie
+- zet er code bij als het relevant is
 
 ## Antwoord op Nina's vragen 
 __IIFE__ Is een functie die zichzelf gelijk invoked. Dan hoef je 'm niet aan te roepen. Hij roept zichzelf gelijk aan. (function(). 
