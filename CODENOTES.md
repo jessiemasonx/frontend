@@ -16,24 +16,6 @@ Een __referenceError__ betekent dat ie geen referentie kan vinden naar de variab
 
 __Engin__ doet het werk. Zorgt er voor dat het programma wordt ingelezen en wordt doorgegeven aan de content. __LHS__ gaat over waar is de declaratie van de var. Wat is de container. En de __RHS__ gaat over wat de waarde is van die variable. Wat is er opgeslagen in de container. 
 
-# lezen in de les
-__Scope__ is the set of rules that determines where and how a variable (identifier) can be looked-up. This may be for the purposes of assigning to the variable, which is an LHS (left-hand-side) reference, or it may be for the purposes of retrieving its value, which is an RHS (right-hand-dise) reference.  
-
-> scope is waar een variable wordt opgeslagen. Waar je ze kan vinden. Een set afspraken. (uit de les)
-
-
-
-## Compiler Theory
-
-The JavaScript engine performs many of the same steps, albeit in more sophisticated ways than we may commonly be aware, of any traditional language-compiler. In a traditional compiled-language process, a chunk of source code, your program, will undergo typically three steps before it is executed, roughly called "compilation":
-
-__1. Tokenizing/Lexing:__
-This is breaking up a string of characters in to meaningful chuncks, called __tokens__.  
-*Example: var a = 2; This would be broken up into the folling tokens: var, a, = and ;.*
-__1. Parsing:__  
-Taking a stream (array) of tokens and turning it into a tree of nested elements which represent the grammatical structure of the program. This tree is called __"AST"__ (Abstract Syntax Tree).
-*Example: the tree for var a = 2; might start with a top-level node called VariableDeclaration, with a child node called Indentifier*
-
 
 # You Don't Know JS: Types & Grammar
 
