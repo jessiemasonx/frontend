@@ -1,9 +1,9 @@
 
 # Chapter 3: Into YDKJS
 
-> scope is waar een variable wordt opgeslagen. Waar je ze kan vinden. Een set afspraken. (uit de les)
-
 ## Scope & Closures
+
+> scope is waar een variable wordt opgeslagen. Waar je ze kan vinden. Een set afspraken. (uit de les)
 
 De JS-engine verzamelt je code vlak voor (en soms tijdens!) De uitvoering. The typical metaphor for JS variable scope management, __"Hoisting."__
 
