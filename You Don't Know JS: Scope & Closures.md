@@ -121,7 +121,87 @@ and hand it back to __Engine__.
 > assigning to the variable, which is an LHS (left-hand-side) reference   
 > retrieving its value, which is an RHS (right-hand-side) reference  
 
+# Chapter 2: Lexical Scope 
 
+There are two predominant models for how scope works.
 
+1. __Lexical Scope__  
+by far the most common, used by the vast majority of programming languages
+2. __Dynamic Scope__  
+still used by some languages
 
+## Lex-time
 
+The first traditional phase of a standard language compiler is called __lexing__ (aka, tokenizing). The lexing process examines a string of source code characters and assigns semantic meaning to the tokens as a result of some stateful parsing.
+
+__Lexical scope__ is based on where variables and blocks of scope are authored, by you, at write time, and thus is (mostly) set in stone by the time the lexer processes your code.
+
+There are three nested scopes inherent in this code example. It may be helpful to think about these scopes as bubbles inside of each other.
+
+![code](https://github.com/getify/You-Dont-Know-JS/blob/master/scope%20%26%20closures/fig2.png)
+
+__Bubble 1__ encompasses the global scope, and has just one identifier in it: foo.  
+__Bubble 2__ encompasses the scope of foo, which includes the three identifiers: a, bar and b.  
+__Bubble 3__ encompasses the scope of bar, and it includes just one identifier: c.  
+
+### Look-ups
+
+In the above code snippet, the Engine executes the console.log(..) statement and goes looking for the three referenced variables a, b, and c. It first starts with the innermost scope bubble, the scope of the bar(..) function. It won't find a there, so it goes up one level, out to the next nearest scope bubble, the scope of foo(..). It finds a there, and so it uses that a. Same thing for b. But c, it does find inside of bar(..).
+
+__Scope look-up stops once it finds the first match.__
+
+> window.a  
+This technique gives access to a global variable which would otherwise be inaccessible due to it being shadowed. However, non-global shadowed variables cannot be accessed.
+
+## Cheating Lexical
+
+__cheating lexical scope leads to poorer performance.
+
+### eval
+
+The eval(..) function in JavaScript takes a string as an argument, and treats the contents of the string as if it had actually been authored code at that point in the program. In other words, you can programmatically generate code inside of your authored code, and run the generated code as if it had been there at author time.
+
+> function foo(str, a) {  
+> 	     eval( str ); // cheating!  
+> 	     console.log( a, b );  
+> }  
+>  
+> var b = 2;  
+>  
+> foo( "var b = 3;", 1 ); // 1 3  
+
+The string "var b = 3;" is treated, at the point of the eval(..) call, as code that was there all along. Because that code happens to declare a new variable b, it modifies the existing lexical scope of foo(..). In fact, as mentioned above, this code actually creates variable b inside of foo(..) that shadows the b that was declared in the outer (global) scope.
+
+> ????????
+
+> can modify existing lexical scope at runtime by evaluating a string of "code" which has one or more declarations in it
+
+### with
+
+with is typically explained as a short-hand for making multiple property references against an object without repeating the object reference itself each time.
+
+> // "easier" short-hand  
+> with (obj) {  
+> 	a = 3;  
+> 	b = 4;  
+> 	c = 5;  
+> }  
+
+> essentially creates a whole new lexical scope at runtime by treating an object reference as a "scope" and that object's properties as scoped identifiers.
+
+### Performance
+
+Both eval(..) and with cheat the otherwise author-time defined lexical scope by modifying or creating new lexical scope at runtime.
+
+Aren't these good features? No.
+
+Most of those optimizations it would make are pointless if eval(..) or with are present, so it simply doesn't perform the optimizations at all.  
+Your code will almost certainly tend to run slower simply by the fact that you include an eval(..) or with anywhere in the code. No matter how smart the Engine may be about trying to limit the side-effects of these pessimistic assumptions, __there's no getting around the fact that without the optimizations, code runs slower.__
+
+# Review (TL;DR)
+
+Lexical scope means that scope is defined by author-time decisions of where functions are declared. The lexing phase of compilation is essentially able to know where and how all identifiers are declared, and thus predict how they will be looked-up during execution.
+
+Two mechanisms in JavaScript can "cheat" lexical scope: eval(..) and with. The former can modify existing lexical scope (at runtime) by evaluating a string of "code" which has one or more declarations in it. The latter essentially creates a whole new lexical scope (again, at runtime) by treating an object reference as a "scope" and that object's properties as scoped identifiers.
+
+The downside to these mechanisms is that it defeats the Engine's ability to perform compile-time optimizations regarding scope look-up, because the Engine has to assume pessimistically that such optimizations will be invalid. Code will run slower as a result of using either feature. Don't use them.
