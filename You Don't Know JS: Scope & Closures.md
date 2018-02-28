@@ -198,10 +198,202 @@ Aren't these good features? No.
 Most of those optimizations it would make are pointless if eval(..) or with are present, so it simply doesn't perform the optimizations at all.  
 Your code will almost certainly tend to run slower simply by the fact that you include an eval(..) or with anywhere in the code. No matter how smart the Engine may be about trying to limit the side-effects of these pessimistic assumptions, __there's no getting around the fact that without the optimizations, code runs slower.__
 
-# Review (TL;DR)
+## Review (TL;DR)
 
 Lexical scope means that scope is defined by author-time decisions of where functions are declared. The lexing phase of compilation is essentially able to know where and how all identifiers are declared, and thus predict how they will be looked-up during execution.
 
 Two mechanisms in JavaScript can "cheat" lexical scope: eval(..) and with. The former can modify existing lexical scope (at runtime) by evaluating a string of "code" which has one or more declarations in it. The latter essentially creates a whole new lexical scope (again, at runtime) by treating an object reference as a "scope" and that object's properties as scoped identifiers.
 
 The downside to these mechanisms is that it defeats the Engine's ability to perform compile-time optimizations regarding scope look-up, because the Engine has to assume pessimistically that such optimizations will be invalid. Code will run slower as a result of using either feature. Don't use them.
+
+# Chapter 3: Function vs. Block Scope
+
+Scope consists of a series of "bubbles" that each act as a container or bucket, in which identifiers (variables, functions) are declared. These bubbles nest neatly inside each other, and this nesting is defined at author-time.
+
+Maar wat precies maakt die bubble? Alleen een functie of ook andere dingen?
+
+## Scope From Functions
+
+Javascript heeft function-based scope. Bij elke functie maakt hij z'n eigen bubble. 
+
+> function foo(a) {
+> 	           var b = 2;
+> 
+> 	// some code
+> 
+> 	function bar() {
+>		// ...
+> 	}
+>  
+> 	// more code
+>  
+> 	var c = 3;
+> }
+
+Hier zit in de bubble van foo(..) de indentifiers a, b. c en bar. En bar heeft ook z'n eigen bubble. Als al die dingen zijn niet te bereiken buiten foo(). Dan krijg je een ReferenceError. Maar de dingen die in foo() zitten kan je wel bereiken in bar().
+
+## Hiding In Plain Scope
+
+De traditionele manier van het denken over een functie is dat je een functie declareert en dan de code erin zet/ Maar de tegenovergestelde manier is ook powerful en useful. Eerst de code dan die dingen er omheen. Daardoor "hide" je de code.
+
+In other words, you can "hide" variables and functions by enclosing them in the scope of a function. The "Principle of Least Privilege" states that in the design of software, such as the API for a module/object, you should expose only what is minimally necessary, and "hide" everything else.
+
+### Collision Avoidance
+
+Another benefit of "hiding" variables and functions inside a scope is to avoid unintended collision between two different identifiers with the same name but different intended usages.
+
+> function foo() {  
+> 	function bar(a) {  
+> 		i = 3; // changing the `i` in the enclosing scope's for-loop  
+> 		console.log( a + i );  
+> 	}
+>   
+	> for (var i=0; i<10; i++) {  
+	> 	bar( i * 2 ); // oops, infinite loop ahead!  
+	> }  
+> }  
+>  
+> foo();  
+
+The i = 3 assignment inside of bar(..) overwrites, unexpectedly, the i that was declared in foo(..) at the for-loop. In this case, it will result in an infinite loop, because i is set to a fixed value of 3 and that will forever remain < 10.
+
+#### Global "Namespaces"
+
+A particularly strong example of (likely) variable collision occurs in the global scope. 
+
+Such libraries typically will create a single variable declaration, often an object, with a sufficiently unique name, in the global scope. This object is then used as a "namespace" for that library, where all specific exposures of functionality are made as properties of that object (namespace), rather than as top-level lexically scoped identifiers themselves.
+
+For example:
+
+> var MyReallyCoolLibrary = {  
+> 	awesome: "stuff",  
+> 	doSomething: function() {  
+> 		// ...  
+> 	},  
+> 	doAnotherThing: function() {  
+> 		// ...  
+> 	}  
+> };  
+
+#### Module Management
+
+Another option for collision avoidance is the more modern "module" approach, using any of various dependency managers. Using these tools, no libraries ever add any identifiers to the global scope, but are instead required to have their identifier(s) be explicitly imported into another specific scope through usage of the dependency manager's various mechanisms.
+
+## Functions As Scopes
+
+We've seen that we can take any snippet of code and wrap a function around it, and that effectively "hides" any enclosed variable or function declarations from the outside scope inside that function's inner scope. While this technique "works", it is not necessarily very ideal. There are a few problems it introduces.  
+The first is that we have to declare a named-function foo(), which means that the identifier name foo itself "pollutes" the enclosing scope (global, in this case). We also have to explicitly call the function by name (foo()) so that the wrapped code actually executes.
+
+It would be more ideal if the function didn't need a name (or, rather, the name didn't pollute the enclosing scope), and if the function could automatically be executed.
+
+Fortunately, JavaScript offers a solution to both problems.
+
+> var a = 2;  
+>   
+> (function foo(){ // <-- insert this  
+>   
+> 	var a = 3; 
+> 	console.log( a ); // 3 
+>  
+> })(); // <-- and this  
+>  
+> console.log( a ); // 2  
+
+Notice that the wrapping function statement starts with (function... as opposed to just function... This is actually a major change. Instead of treating the function as a standard declaration, the function is treated as a function-expression.
+
+The key difference we can observe here between a function declaration and a function expression relates to where its name is bound as an identifier.
+
+### Anonymous vs. Named
+
+function() is een  "anonymous function expression", because function()... has no name identifier on it. 
+
+Anonymous function expressions are quick and easy to type, and many libraries and tools tend to encourage this idiomatic style of code. However, they have several draw-backs to consider:
+
+1. Anonymous functions have no useful name to display in stack traces, which can make debugging more difficult.
+
+2. Without a name, if the function needs to refer to itself, for recursion, etc., the deprecated arguments.callee reference is unfortunately required. Another example of needing to self-reference is when an event handler function wants to unbind itself after it fires.
+
+3. Anonymous functions omit a name that is often helpful in providing more readable/understandable code. A descriptive name helps self-document the code in question.
+
+The best practice is to always name your function expressions:
+
+> setTimeout( function timeoutHandler(){ // <-- Look, I have a name!
+
+### Invoking Function Expressions Immediately
+
+Now that we have a function as an expression by virtue of wrapping it in a ( ) pair, we can execute that function by adding another () on the end, like (function foo(){ .. })(). The first enclosing ( ) pair makes the function an expression, and the second () executes the function.
+
+> (function foo(){  
+>  
+>	var a = 3;  
+>	console.log( a ); // 3  
+>  
+> })();  
+
+A few years ago the community agreed on a term for it: __IIFE__, which stands for __Immediately Invoked Function Expression__.
+
+## Blocks As Scopes
+
+> for (var i=0; i<10; i++) {  
+> 	console.log( i );  
+> }  
+
+We declare the variable i directly inside the for-loop head, most likely because our intent is to use i only within the context of that for-loop, and essentially ignore the fact that the variable actually scopes itself to the enclosing scope (function or global).
+
+That's what block-scoping is all about. Declaring variables as close as possible, as local as possible, to where they will be used. 
+
+### with
+
+ It's an example of (a form of) block scope, in that the scope that is created from the object only exists for the lifetime of that with statement, and not in the enclosing scope.
+ 
+ ### try/catch
+ 
+ It's a very little known fact that JavaScript in ES3 specified the variable declaration in the catch clause of a try/catch to be block-scoped to the catch block.
+ 
+ > ??
+ 
+ ### let
+ 
+  ES6 introduces a new keyword __let__ which sits alongside var as another way to declare variables.  
+The *let* keyword attaches the variable declaration to the scope of whatever block (commonly a { .. } pair) it's contained in. In other words, *let* implicitly hijacks any block's scope for its variable declaration.
+
+> if (foo) {  
+> 	let bar = foo * 2;  
+> 	bar = something( bar );  
+> 	console.log( bar );  
+> }  
+
+Using __let__ to attach a variable to an existing block is somewhat implicit. Usually, explicit code is preferable over implicit or subtle code.
+
+### Garbage Collection
+
+Another reason block-scoping is useful relates to closures and garbage collection to reclaim memory.
+
+Declaring explicit blocks for variables to locally bind to is a powerful tool that you can add to your code toolbox.
+
+### let Loops
+
+> for (let i=0; i<10; i++) {  
+>	console.log( i );  
+> }  
+>  
+>  console.log( i ); // ReferenceError  
+
+Not only does let in the for-loop header bind the i to the for-loop body, but in fact, it re-binds it to each iteration of the loop, making sure to re-assign it the value from the end of the previous loop iteration.
+
+### const
+
+n addition to let, ES6 introduces __const__, which also creates a block-scoped variable, but whose value is fixed (constant). Any attempt to change that value at a later time results in an error.
+
+## Review (TL;DR)
+
+Functions are the most common unit of scope in JavaScript. Variables and functions that are declared inside another function are essentially "hidden" from any of the enclosing "scopes", which is an intentional design principle of good software.
+
+But functions are by no means the only unit of scope. Block-scope refers to the idea that variables and functions can belong to an arbitrary block (generally, any { .. } pair) of code, rather than only to the enclosing function.
+
+Starting with ES3, the try/catch structure has block-scope in the catch clause.
+
+In ES6, the let keyword (a cousin to the var keyword) is introduced to allow declarations of variables in any arbitrary block of code. if (..) { let a = 2; } will declare a variable a that essentially hijacks the scope of the if's { .. } block and attaches itself there.
+
+Though some seem to believe so, block scope should not be taken as an outright replacement of var function scope. Both functionalities co-exist, and developers can and should use both function-scope and block-scope techniques where respectively appropriate to produce better, more readable/maintainable code.
+
