@@ -216,19 +216,19 @@ Maar wat precies maakt die bubble? Alleen een functie of ook andere dingen?
 
 Javascript heeft function-based scope. Bij elke functie maakt hij z'n eigen bubble. 
 
-> function foo(a) {
-> 	           var b = 2;
-> 
-> 	// some code
-> 
-> 	function bar() {
->		// ...
-> 	}
->  
-> 	// more code
->  
-> 	var c = 3;
-> }
+	> function foo(a) {
+	> 	           var b = 2;
+	> 
+	> 	// some code
+	> 
+	> 	function bar() {
+	>		// ...
+	> 	}
+	>  
+	> 	// more code
+	>  
+	> 	var c = 3;
+	> }
 
 Hier zit in de bubble van foo(..) de indentifiers a, b. c en bar. En bar heeft ook z'n eigen bubble. Als al die dingen zijn niet te bereiken buiten foo(). Dan krijg je een ReferenceError. Maar de dingen die in foo() zitten kan je wel bereiken in bar().
 
