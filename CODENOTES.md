@@ -51,9 +51,9 @@ Variables that have no value currently, actually have the undefined value. Ca
 
 An __undefined__ variable is one that has been declared in the accessible scope, but at the moment has no other value in it. By contrast, an __undeclared__ variable is one that has not been formally declared in the accessible scope.
 
-var a;  
-a; // undefined  
-b; // ReferenceError: b is not defined  
+	var a;  
+	a; // undefined  
+	b; // ReferenceError: b is not defined  
 
 Here b is undeclared. 
 
@@ -76,10 +76,10 @@ Een consequentie van onveranderlijke __strings__ is dat geen van de *string meth
 
 Nog een voorbeeld: reversing a string. Arrays have a reverse() in-place mutator method, but strings do not:  
 
-a.reverse;		// undefined  
-
-> b.reverse();	                // ["!","o","O","f"]  
-> b;				// [“!","o","O","f"]
+	a.reverse;		// undefined  
+	
+	b.reverse();	                // ["!","o","O","f"]  
+	b;				// [“!","o","O","f"]
 
 ### Numbers
 JavaScript has just one numeric type: number. This type includes both "integer" values and fractional decimal numbers. 
@@ -89,41 +89,41 @@ Number literals are expressed in JavaScript generally as base-10 decimal literal
 
 Very large or very small numbers will by default be outputted in exponent form, the same as the output of the toExponential() method, like:
 
-> var a = 5E10;  
-> a;					// 50000000000  
-> a.toExponential();	// "5e+10"  
-
-> var b = a * a;  
-> b;					// 2.5e+21  
-
-> var c = 1 / a;  
-> c;					// 2e-11  
+	var a = 5E10;  
+	a;					// 50000000000  
+	a.toExponential();	// "5e+10"  
+	
+	var b = a * a;  
+	b;					// 2.5e+21  
+	
+	var c = 1 / a;  
+	c;					// 2e-11  
 
 Number values can access methods that are built into the Number.prototype. 
 Voorbeeld: toFixed(..) method. Geeft aan met hoeveel decimalen u de waarde wilt laten weergeven:
 var a = 42.59;
 
-> a.toFixed( 0 ); // "43"  
-> a.toFixed( 1 ); // "42.6"  
-> a.toFixed( 2 ); // "42.59"  
-> a.toFixed( 3 ); // "42.590"  
-> a.toFixed( 4 ); // "42.5900"
+	a.toFixed( 0 ); // "43"  
+	a.toFixed( 1 ); // "42.6"  
+	a.toFixed( 2 ); // "42.59"  
+	a.toFixed( 3 ); // "42.590"  
+	a.toFixed( 4 ); // "42.5900"
 
 toPrecision(..) lijkt er op, maar geeft aan hoe veel *significant digits* moeten worden gebruikt om de waarde aan te geven:
 var a = 42.59;
 
-> a.toPrecision( 1 ); // "4e+1"  
-> a.toPrecision( 2 ); // "43"  
-> a.toPrecision( 3 ); // "42.6"  
-> a.toPrecision( 4 ); // "42.59"  
-> a.toPrecision( 5 ); // "42.590"  
-> a.toPrecision( 6 ); // "42.5900"  
+	a.toPrecision( 1 ); // "4e+1"  
+	a.toPrecision( 2 ); // "43"  
+	a.toPrecision( 3 ); // "42.6"  
+	a.toPrecision( 4 ); // "42.59"  
+	a.toPrecision( 5 ); // "42.590"  
+	a.toPrecision( 6 ); // "42.5900"  
 
 number literals can also be expressed in other bases, like binary, octal, and hexadecimal:
 
-> 0xf3; // hexadecimal for: 243  
-> 0Xf3; // ditto  
-> 0363; // octal for: 243
+	0xf3; // hexadecimal for: 243  
+	0Xf3; // ditto  
+	0363; // octal for: 243
 
 ### Small Decimal Value
 The most (in)famous side effect of using binary floating-point numbers is:
@@ -622,13 +622,13 @@ What we're doing here is relying on the 1 for true/truthy coercions, and numeric
 
 We could of course do this with explicit coercion instead:
 
-> function onlyOne() {
-> 	var sum = 0;
-> 	for (var i=0; i < arguments.length; i++) {
-> 		sum += Number( !!arguments[i] );
-> 	}
-> 	return sum === 1;
-> }
+	function onlyOne() {
+		var sum = 0;
+		for (var i=0; i < arguments.length; i++) {
+			sum += Number( !!arguments[i] );
+		}
+		return sum === 1;		
+		}
 
 We first use !!arguments[i] to force the coercion of the value to true or false. That's so you could pass non-boolean values in, like onlyOne( "42", 0 ), and it would still work as expected (otherwise you'd end up with string concatenation and the logic would be incorrect).  
 Once we're sure it's a boolean, we do another explicit coercion with Number(..) to make sure the value is 0 or 1.
@@ -651,20 +651,20 @@ var c;
 var d = null;
 
 
-> if (a) {  
-> 	console.log( "yep" );		// yep  
-> }  
->    
-> while (c) {  
-> 	console.log( "nope, never runs" );  
-> }  
->  
-> c = d ? a : b;  
-> c;					// "abc"  
->  
-> if ((a && d) || c) {  
-> 	console.log( "yep" );		// yep  
-> }  
+	if (a) {  
+		console.log( "yep" );		// yep  
+	}  
+	   
+	while (c) {  
+		console.log( "nope, never runs" );  
+	}  
+	 
+	c = d ? a : b;  
+	c;					// "abc"  
+	 
+	if ((a && d) || c) {  
+		console.log( "yep" );		// yep  
+	}  
 
 
 
@@ -678,15 +678,15 @@ __&&__ logical and
 I'd call them "selector operators," or more completely, "operand selector operators". Because they don't actually result in a logic value (aka boolean) in JavaScript, as they do in some other languages.  
 They result in the value of one (and only one) of their two operands. In other words, they __select one of the two operand's values__.
 
-> var a = 42;  
-> var b = "abc";  
-> var c = null;  
->  
-> a || b;		// 42  
-> a && b;		// "abc"  
->  
-> c || b;		// "abc"  
-> c && b;		// null  
+	var a = 42;  
+	var b = "abc";  
+	var c = null;  
+	 
+	a || b;		// 42  
+	a && b;		// "abc"  
+	 
+	c || b;		// "abc"  
+	c && b;		// null  
 
 __Wait, what!?__.  In languages like C and PHP, those expressions result in true or false, but in JS, the result comes from the values themselves.
 
@@ -705,15 +705,15 @@ Inversely, for the && operator, if the test is true, the && expression results i
 
 An extremely common and helpful usage of this behavior, which there's a good chance you may have used before and not fully understood, is:
 
-> function foo(a,b) {  
-> 	a = a || "hello";  
-> 	b = b || "world";  
->  
-> 	console.log( a + " " + b );  
-> }  
->   
-> foo();					// "hello world"  
-> foo( "yeah", "yeah!" );	// "yeah yeah!"  
+	function foo(a,b) {  
+		a = a || "hello";  
+		b = b || "world";  
+	
+		console.log( a + " " + b );  
+	}  
+	 
+	foo();					// "hello world"  
+	foo( "yeah", "yeah!" );	// "yeah yeah!"  
 
 The a = a || "hello" idiom (sometimes said to be JavaScript's version of the C# "null coalescing operator") acts to test a and if it has no value (or only an undesired falsy value), provides a backup default value ("hello").
 
@@ -721,11 +721,10 @@ What about &&?
 
 The && operator "selects" the second operand if and only if the first operand tests as truthy, and this usage is sometimes called the "guard operator" -- the first expression test "guards" the second expression:
 
-> function foo() {  
-> 	console.log( a );  
-> }  
-> var a = 42;  
-> a && foo(); // 42  
+	function foo() {  		console.log( a );  
+	}  
+	var a = 42;  
+	a && foo(); // 42  
 
 OK, so || and && have some neat tricks up their sleeve, as long as you're willing to allow the implicit coercion into the mix.
 
