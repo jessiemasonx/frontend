@@ -427,7 +427,7 @@ When you see __var a = 2;__, you probably think of that as one statement. But Ja
 
 	var a;
 	a = 2;
-
+	 -	
 	console.log( a );
 	
 Eerste deel is compilation en 2e deel is execution.
