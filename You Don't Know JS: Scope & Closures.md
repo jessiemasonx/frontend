@@ -1,3 +1,9 @@
+1. [Chapter 1: What is Scope?](https://github.com/jessiemasonx/frontend/blob/master/You%20Don't%20Know%20JS:%20Scope%20&%20Closures.md#chapter-1-what-is-scope)
+2. [Chapter 2: Lexical Scope](https://github.com/jessiemasonx/frontend/blob/master/You%20Don't%20Know%20JS:%20Scope%20&%20Closures.md#chapter-2-lexical-scope)
+3. [Chapter 3: Function vs. Block Scope](https://github.com/jessiemasonx/frontend/blob/master/You%20Don't%20Know%20JS:%20Scope%20&%20Closures.md#chapter-3-function-vs-block-scope)
+4. [Chapter 4: Hoisting](https://github.com/jessiemasonx/frontend/blob/master/You%20Don't%20Know%20JS:%20Scope%20&%20Closures.md#chapter-4-hoisting)
+5. [Chapter 5: Scope Closure](https://github.com/jessiemasonx/frontend/blob/master/You%20Don't%20Know%20JS:%20Scope%20&%20Closures.md#chapter-5-scope-closure)
+
 # Chapter 1: What is Scope?
 
 __Scope__ is the set of rules that determines where and how a variable (identifier) can be looked-up.
