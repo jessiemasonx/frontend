@@ -216,19 +216,19 @@ Maar wat precies maakt die bubble? Alleen een functie of ook andere dingen?
 
 Javascript heeft function-based scope. Bij elke functie maakt hij z'n eigen bubble. 
 
-	> function foo(a) {
-	> 	           var b = 2;
-	> 
-	> 	// some code
-	> 
-	> 	function bar() {
-	>		// ...
-	> 	}
-	>  
-	> 	// more code
-	>  
-	> 	var c = 3;
-	> }
+	 function foo(a) {
+	 	           var b = 2;
+	 
+	 	// some code
+	 
+	 	function bar() {
+			// ...
+	 	}
+	  
+	 	// more code
+	  
+	 	var c = 3;
+	 }
 
 Hier zit in de bubble van foo(..) de indentifiers a, b. c en bar. En bar heeft ook z'n eigen bubble. Als al die dingen zijn niet te bereiken buiten foo(). Dan krijg je een ReferenceError. Maar de dingen die in foo() zitten kan je wel bereiken in bar().
 
@@ -397,3 +397,103 @@ In ES6, the let keyword (a cousin to the var keyword) is introduced to allow dec
 
 Though some seem to believe so, block scope should not be taken as an outright replacement of var function scope. Both functionalities co-exist, and developers can and should use both function-scope and block-scope techniques where respectively appropriate to produce better, more readable/maintainable code.
 
+## Chapter 4: Hoisting
+
+__any variable declared within a scope is attached to that scope.__
+
+### Chicken Or The Egg?
+
+	 a = 2;  
+	   
+	 var a;  
+	   
+	 console.log( a );  
+	
+Mensen zouden denken dat console.log undefined zou geven omdat de var a statement na de a = 2 komt. Maar de output is gewoon 2. 
+
+	console.log( a );
+
+	var a = 2;
+	
+Maaar bij dit stukje geeft ie undefined.  
+
+### The Compiler Strikes Again
+
+Recall that the Engine actually will compile your JavaScript code before it interprets it. 
+ 
+So, the best way to think about things is that all declarations, both variables and functions, are processed first, before any part of your code is executed.
+
+When you see __var a = 2;__, you probably think of that as one statement. But JavaScript actually thinks of it as two statements: *var a;* and *a = 2;*. The first statement, the __declaration__, is processed during the __compilation__ phase. The second statement, __the assignment__, is left in place for the __execution__ phase.
+
+	var a;
+	a = 2;
+
+	console.log( a );
+	
+Eerste deel is compilation en 2e deel is execution.
+
+Variable and function declarations are "moved" from where they appear in the flow of the code to the top of the code. This gives rise to the name __"Hoisting"__.
+
+In other words, the egg (declaration) comes before the chicken (assignment).
+
+__hoisting is per-scope__  
+Als je var a in een functie hebt gaat ie bovenaan die functie dus die scope.
+
+	function foo() {
+		var a;
+	
+		console.log( a ); // undefined
+	
+		a = 2;
+	}
+	
+	foo();
+	
+Function declarations are hoisted, as we just saw. But function expressions are not.
+
+	foo(); // not ReferenceError, but TypeError!  
+	
+	var foo = function bar() {
+		// ...
+	};
+
+foo has no value yet (as it would if it had been a true function declaration instead of expression). So, foo() is attempting to invoke the undefined value, which is a TypeError illegal operation.
+
+## Functions First
+
+Both function declarations and variable declarations are hoisted. But a subtle detail (that can show up in code with multiple "duplicate" declarations) is that functions are hoisted first, and then variables.
+
+	foo(); // 1
+	
+	var foo;
+	
+	function foo() {
+		console.log( 1 );
+	}
+	
+	foo = function() {
+		console.log( 2 );
+	};
+1 is printed instead of 2!
+
+De volgorde wordt nu zo geprint door de *engine*:
+
+	function foo() {
+		console.log( 1 );
+	}
+	
+	foo(); // 1
+	
+	foo = function() {
+		console.log( 2 );
+	};
+	
+## Review 
+
+We can be tempted to look at var a = 2; as one statement, but the JavaScript Engine does not see it that way. It sees var a and a = 2 as two separate statements, the first one a compiler-phase task, and the second one an execution-phase task.
+
+What this leads to is that all declarations in a scope, regardless of where they appear, are processed first before the code itself is executed. You can visualize this as declarations (variables and functions) being "moved" to the top of their respective scopes, which we call "hoisting".
+
+Declarations themselves are hoisted, but assignments, even assignments of function expressions, are not hoisted.
+
+Be careful about duplicate declarations, especially mixed between normal var declarations and function declarations -- peril awaits if you do!
