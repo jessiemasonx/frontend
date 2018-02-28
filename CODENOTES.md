@@ -1,4 +1,4 @@
-
+[Bottom](https://github.com/jessiemasonx/frontend/blob/master/CODENOTES.md#switch)
 
 
 #### Tips bij het lezen
@@ -1308,3 +1308,5 @@ Let's briefly explore the switch statement, a sort-of syntactic shorthand for an
 > }  
 
 As you can see, it evaluates a once, then matches the resulting value to each case expression (just simple value expressions here). If a match is found, execution will begin in that matched case, and will either go until a break is encountered or until the end of the switch block is found.
+
+[Top](https://github.com/jessiemasonx/frontend/blob/master/CODENOTES.md#tips-bij-het-lezen)
