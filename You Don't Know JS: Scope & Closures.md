@@ -242,18 +242,18 @@ In other words, you can "hide" variables and functions by enclosing them in the 
 
 Another benefit of "hiding" variables and functions inside a scope is to avoid unintended collision between two different identifiers with the same name but different intended usages.
 
-> function foo() {  
-> 	function bar(a) {  
-> 		i = 3; // changing the `i` in the enclosing scope's for-loop  
-> 		console.log( a + i );  
-> 	}
->   
+	> function foo() {  
+	> 	function bar(a) {  
+	> 		i = 3; // changing the `i` in the enclosing scope's for-loop  
+	> 		console.log( a + i );  
+	> 	}
+	>   
 	> for (var i=0; i<10; i++) {  
 	> 	bar( i * 2 ); // oops, infinite loop ahead!  
 	> }  
-> }  
->  
-> foo();  
+	> }  
+	>  
+	> foo();  
 
 The i = 3 assignment inside of bar(..) overwrites, unexpectedly, the i that was declared in foo(..) at the for-loop. In this case, it will result in an infinite loop, because i is set to a fixed value of 3 and that will forever remain < 10.
 
@@ -265,15 +265,15 @@ Such libraries typically will create a single variable declaration, often an obj
 
 For example:
 
-> var MyReallyCoolLibrary = {  
-> 	awesome: "stuff",  
-> 	doSomething: function() {  
-> 		// ...  
-> 	},  
-> 	doAnotherThing: function() {  
-> 		// ...  
-> 	}  
-> };  
+	> var MyReallyCoolLibrary = {  
+	> 	awesome: "stuff",  
+	> 	doSomething: function() {  
+	> 		// ...  
+	> 	},  
+	> 	doAnotherThing: function() {  
+	> 		// ...  
+	> 	}  
+	> };  
 
 #### Module Management
 
@@ -288,16 +288,16 @@ It would be more ideal if the function didn't need a name (or, rather, the name 
 
 Fortunately, JavaScript offers a solution to both problems.
 
-> var a = 2;  
->   
-> (function foo(){ // <-- insert this  
->   
-> 	var a = 3; 
-> 	console.log( a ); // 3 
->  
-> })(); // <-- and this  
->  
-> console.log( a ); // 2  
+	> var a = 2;  
+	>   
+	> (function foo(){ // <-- insert this  
+	>   
+	> 	var a = 3; 
+	> 	console.log( a ); // 3 
+	>  
+	> })(); // <-- and this  
+	>  
+	> console.log( a ); // 2  
 
 Notice that the wrapping function statement starts with (function... as opposed to just function... This is actually a major change. Instead of treating the function as a standard declaration, the function is treated as a function-expression.
 
@@ -323,20 +323,20 @@ The best practice is to always name your function expressions:
 
 Now that we have a function as an expression by virtue of wrapping it in a ( ) pair, we can execute that function by adding another () on the end, like (function foo(){ .. })(). The first enclosing ( ) pair makes the function an expression, and the second () executes the function.
 
-> (function foo(){  
->  
->	var a = 3;  
->	console.log( a ); // 3  
->  
-> })();  
+	> (function foo(){  
+	>  
+	>	var a = 3;  
+	>	console.log( a ); // 3  
+	>  
+	> })();  
 
 A few years ago the community agreed on a term for it: __IIFE__, which stands for __Immediately Invoked Function Expression__.
 
 ## Blocks As Scopes
 
-> for (var i=0; i<10; i++) {  
-> 	console.log( i );  
-> }  
+	> for (var i=0; i<10; i++) {  
+	> 	console.log( i );  
+	> }  
 
 We declare the variable i directly inside the for-loop head, most likely because our intent is to use i only within the context of that for-loop, and essentially ignore the fact that the variable actually scopes itself to the enclosing scope (function or global).
 
@@ -357,11 +357,11 @@ That's what block-scoping is all about. Declaring variables as close as possible
   ES6 introduces a new keyword __let__ which sits alongside var as another way to declare variables.  
 The *let* keyword attaches the variable declaration to the scope of whatever block (commonly a { .. } pair) it's contained in. In other words, *let* implicitly hijacks any block's scope for its variable declaration.
 
-> if (foo) {  
-> 	let bar = foo * 2;  
-> 	bar = something( bar );  
-> 	console.log( bar );  
-> }  
+	> if (foo) {  
+	> 	let bar = foo * 2;  
+	> 	bar = something( bar );  
+	> 	console.log( bar );  
+	> }  
 
 Using __let__ to attach a variable to an existing block is somewhat implicit. Usually, explicit code is preferable over implicit or subtle code.
 
@@ -373,10 +373,10 @@ Declaring explicit blocks for variables to locally bind to is a powerful tool th
 
 ### let Loops
 
-> for (let i=0; i<10; i++) {  
->	console.log( i );  
-> }  
->  
+	> for (let i=0; i<10; i++) {  
+	>	console.log( i );  
+	> }  
+		>  
 >  console.log( i ); // ReferenceError  
 
 Not only does let in the for-loop header bind the i to the for-loop body, but in fact, it re-binds it to each iteration of the loop, making sure to re-assign it the value from the end of the previous loop iteration.
