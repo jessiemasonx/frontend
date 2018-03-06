@@ -3,7 +3,7 @@
 3. [Chapter 3: Function vs. Block Scope](https://github.com/jessiemasonx/frontend/blob/master/You%20Don't%20Know%20JS:%20Scope%20&%20Closures.md#chapter-3-function-vs-block-scope)
 4. [Chapter 4: Hoisting](https://github.com/jessiemasonx/frontend/blob/master/You%20Don't%20Know%20JS:%20Scope%20&%20Closures.md#chapter-4-hoisting)
 5. [Chapter 5: Scope Closure](https://github.com/jessiemasonx/frontend/blob/master/You%20Don't%20Know%20JS:%20Scope%20&%20Closures.md#chapter-5-scope-closure)
-6. [aantekeningen les]( )
+6. [Aantekeningen Les](https://github.com/jessiemasonx/frontend/blob/master/You%20Don't%20Know%20JS:%20Scope%20&%20Closures.md#aantekeningen-les)
 
 # Chapter 1: What is Scope?
 
