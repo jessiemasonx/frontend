@@ -3,6 +3,7 @@
 3. [Chapter 3: Function vs. Block Scope](https://github.com/jessiemasonx/frontend/blob/master/You%20Don't%20Know%20JS:%20Scope%20&%20Closures.md#chapter-3-function-vs-block-scope)
 4. [Chapter 4: Hoisting](https://github.com/jessiemasonx/frontend/blob/master/You%20Don't%20Know%20JS:%20Scope%20&%20Closures.md#chapter-4-hoisting)
 5. [Chapter 5: Scope Closure](https://github.com/jessiemasonx/frontend/blob/master/You%20Don't%20Know%20JS:%20Scope%20&%20Closures.md#chapter-5-scope-closure)
+6. [aantekeningen les]( )
 
 # Chapter 1: What is Scope?
 
@@ -679,3 +680,17 @@ Modules require two key characteristics: 1) an outer wrapping function being inv
 Now we can see closures all around our existing code, and we have the ability to recognize and leverage them to our own benefit!
 
 
+# Aantekeningen les
+	ReferenceError
+Er kan geen referencie naar die variable gevonden worden. 
+
+Als je scopes in elkaar hebt kan je wel van binnen naar buiten maar niet van buiten naar binnen. De buitenste scope kan geen var pakken uit de binnenste, maar andersom wel.
+
+Een functie wordt in de stack gezet, nadat het uitgevoerd wordt gaat ie weg. 
+
+__Closure__: De innerfunctie closes over de scope waar die in zit. Ookal is die scope mss al klaar met doen wat ie doet. De functie houdt een referentie naar die scope.
+
+setTimeout is een callback. 
+	setTimeout(inner, 1000);
+	
+Bij __hoisting__ wordt in een functie de var bovenaan gezet.
