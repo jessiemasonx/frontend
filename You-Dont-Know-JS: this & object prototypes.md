@@ -735,3 +735,202 @@ The final descriptor characteristic we will mention here is `enumerable`.
 All normal user-defined properties are defaulted to `enumerable`, as this is most commonly what you want. But if you have a special property you want to hide from enumeration, set it to `enumerable:false`.
 
 ### Immutability
+
+It is sometimes desired to make properties or objects that cannot be changed (either by accident or intentionally). ES5 adds support for handling that in a variety of different nuanced ways.
+
+```js
+myImmutableObject.foo; // [1,2,3]
+myImmutableObject.foo.push( 4 );
+myImmutableObject.foo; // [1,2,3,4]
+```
+We assume in this snippet that `myImmutableObject` is already created and protected as immutable. But, to also protect the contents of `myImmutableObject.foo` (which is its own object -- array), you would also need to make `foo` immutable, using one or more of the following functionalities.
+
+#### Object Constant
+
+By combining `writable:false` and `configurable:false`, you can essentially create a *constant* (cannot be changed, redefined or deleted) as an object property, like:
+
+```js
+var myObject = {};
+
+Object.defineProperty( myObject, "FAVORITE_NUMBER", {
+	value: 42,
+	writable: false,
+	configurable: false
+} );
+```
+
+#### Prevent Extensions
+
+If you want to prevent an object from having new properties added to it, but otherwise leave the rest of the object's properties alone, call `Object.preventExtensions(..)`:
+
+```js
+var myObject = {
+	a: 2
+};
+
+Object.preventExtensions( myObject );
+
+myObject.b = 3;
+myObject.b; // undefined
+```
+
+In `non-strict mode`, the creation of `b` fails silently. In `strict mode`, it throws a `TypeError`.
+
+#### Seal
+
+`Object.seal(..)` creates a "sealed" object, which means it takes an existing object and essentially calls `Object.preventExtensions(..)` on it, but also marks all its existing properties as `configurable:false`.
+
+#### Freeze
+
+`Object.freeze(..)` creates a frozen object, which means it takes an existing object and essentially calls `Object.seal(..)` on it, but it also marks all "data accessor" properties as `writable:false`, so that their values cannot be changed.
+
+You could "deep freeze" an object by calling `Object.freeze(..)` on the object, and then recursively iterating over all objects it references (which would have been unaffected thus far), and calling `Object.freeze(..)` on them as well. Be careful, though, as that could affect other (shared) objects you're not intending to affect.
+
+### `[[Get]]`
+
+Consider:
+
+```js
+var myObject = {
+	a: 2
+};
+
+myObject.a; // 2
+```
+
+The `myObject.a` is a property access, but it doesn't *just* look in `myObject` for a property of the name `a`, as it might seem.
+
+According to the spec, the code above actually performs a `[[Get]]` operation (kinda like a function call: `[[Get]]()`) on the `myObject`. The default built-in `[[Get]]` operation for an object *first* inspects the object for a property of the requested name, and if it finds it, it will return the value accordingly.
+
+### `[[Put]]`
+
+Since there's an internally defined `[[Get]]` operation for getting a value from a property, it should be obvious there's also a default `[[Put]]` operation.
+
+When invoking `[[Put]]`, how it behaves differs based on a number of factors, including (most impactfully) whether the property is already present on the object or not.
+
+If the property is present, the `[[Put]]` algorithm will roughly check:
+
+1. Is the property an accessor descriptor (see "Getters & Setters" section below)? **If so, call the setter, if any.**
+2. Is the property a data descriptor with `writable` of `false`? **If so, silently fail in `non-strict mode`, or throw `TypeError` in `strict mode`.**
+3. Otherwise, set the value to the existing property as normal.
+
+If the property is not yet present on the object in question, the `[[Put]]` operation is even more nuanced and complex. We will revisit this scenario in Chapter 5 when we discuss `[[Prototype]]` to give it more clarity.
+
+### Getters & Setters
+
+The default `[[Put]]` and `[[Get]]` operations for objects completely control how values are set to existing or new properties, or retrieved from existing properties, respectively.
+
+ES5 introduced a way to override part of these default operations, not on an object level but a per-property level, through the use of getters and setters. Getters are properties which actually call a hidden function to retrieve a value. Setters are properties which actually call a hidden function to set a value.
+
+When you define a property to have either a getter or a setter or both, its definition becomes an "accessor descriptor" (as opposed to a "data descriptor"). For accessor-descriptors, the `value` and `writable` characteristics of the descriptor are moot and ignored, and instead JS considers the `set` and `get` characteristics of the property (as well as `configurable` and `enumerable`).
+
+Consider:
+
+```js
+var myObject = {
+	// define a getter for `a`
+	get a() {
+		return 2;
+	}
+};
+
+Object.defineProperty(
+	myObject,	// target
+	"b",		// property name
+	{			// descriptor
+		// define a getter for `b`
+		get: function(){ return this.a * 2 },
+
+		// make sure `b` shows up as an object property
+		enumerable: true
+	}
+);
+
+myObject.a; // 2
+
+myObject.b; // 4
+```
+
+### Existence
+
+
+We can ask an object if it has a certain property *without* asking to get that property's value:
+
+```js
+var myObject = {
+	a: 2
+};
+
+("a" in myObject);				// true
+("b" in myObject);				// false
+
+myObject.hasOwnProperty( "a" );	// true
+myObject.hasOwnProperty( "b" );	// false
+```
+
+he `in` operator will check to see if the property is *in* the object, or if it exists at any higher level of the `[[Prototype]]` chain object traversal (see Chapter 5). By contrast, `hasOwnProperty(..)` checks to see if *only* `myObject` has the property or not, and will *not* consult the `[[Prototype]]` chain.
+
+#### Enumeration
+
+
+```js
+var myObject = { };
+
+Object.defineProperty(
+	myObject,
+	"a",
+	// make `a` enumerable, as normal
+	{ enumerable: true, value: 2 }
+);
+
+Object.defineProperty(
+	myObject,
+	"b",
+	// make `b` NON-enumerable
+	{ enumerable: false, value: 3 }
+);
+
+myObject.b; // 3
+("b" in myObject); // true
+myObject.hasOwnProperty( "b" ); // true
+
+// .......
+
+for (var k in myObject) {
+	console.log( k, myObject[k] );
+}
+// "a" 2
+```
+
+You'll notice that `myObject.b` in fact **exists** and has an accessible value, but it doesn't show up in a `for..in` loop (though, surprisingly, it **is** revealed by the `in` operator existence check). That's because "enumerable" basically means "will be included if the object's properties are iterated through".
+
+## Iteration
+
+The `for..in` loop iterates over the list of enumerable properties on an object (including its `[[Prototype]]` chain). But what if you instead want to iterate over the values?
+
+With numerically-indexed arrays, iterating over the values is typically done with a standard `for` loop, like:
+
+```js
+var myArray = [1, 2, 3];
+
+for (var i = 0; i < myArray.length; i++) {
+	console.log( myArray[i] );
+}
+// 1 2 3
+```
+
+This isn't iterating over the values, though, but iterating over the indices, where you then use the index to reference the value, as `myArray[i]`.
+
+## Review
+
+Objects in JS have both a literal form (such as `var a = { .. }`) and a constructed form (such as `var a = new Array(..)`). The literal form is almost always preferred, but the constructed form offers, in some cases, more creation options.
+
+Many people mistakenly claim "everything in JavaScript is an object", but this is incorrect. Objects are one of the 6 (or 7, depending on your perspective) primitive types. Objects have sub-types, including `function`, and also can be behavior-specialized, like `[object Array]` as the internal label representing the array object sub-type.
+
+Objects are collections of key/value pairs. The values can be accessed as properties, via `.propName` or `["propName"]` syntax. Whenever a property is accessed, the engine actually invokes the internal default `[[Get]]` operation (and `[[Put]]` for setting values), which not only looks for the property directly on the object, but which will traverse the `[[Prototype]]` chain (see Chapter 5) if not found.
+
+Properties have certain characteristics that can be controlled through property descriptors, such as `writable` and `configurable`. In addition, objects can have their mutability (and that of their properties) controlled to various levels of immutability using `Object.preventExtensions(..)`, `Object.seal(..)`, and `Object.freeze(..)`.
+
+Properties don't have to contain values -- they can be "accessor properties" as well, with getters/setters. They can also be either *enumerable* or not, which controls if they show up in `for..in` loop iterations, for instance.
+
+You can also iterate over **the values** in data structures (arrays, objects, etc) using the ES6 `for..of` syntax, which looks for either a built-in or custom `@@iterator` object consisting of a `next()` method to advance through the data values one at a time.
