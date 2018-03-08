@@ -36,7 +36,7 @@ The this mechanism provides a more elegant way of implicitly "passing along" an 
 
 ## Confusions
 
-how it doesn't actually work:
+how it *doesn't* actually work:
 
 ### Itself
 
