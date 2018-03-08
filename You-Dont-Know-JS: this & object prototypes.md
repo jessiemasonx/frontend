@@ -555,3 +555,183 @@ myObject.someFoo;	// function foo(){..}
 someFoo and myObject.someFoo are just two separate references to the same function, and neither implies anything about the function being special or "owned" by any other object. If foo() above was defined to have a this reference inside it, that myObject.someFoo implicit binding would be the only observable difference between the two references. Neither reference really makes sense to be called a "method".
 
 ### Arrays
+
+Arrays also use the `[ ]` access form, but as mentioned above, they have slightly more structured organization for how and where values are stored (though still no restriction on what *type* of values are stored). Arrays assume *numeric indexing*, which means that values are stored in locations, usually called *indices*, at non-negative integers, such as `0` and `42`.
+
+```js
+var myArray = [ "foo", 42, "bar" ];
+
+myArray.length;		// 3
+
+myArray[0];			// "foo"
+
+myArray[2];			// "bar"
+```
+
+Arrays *are* objects, so even though each index is a positive integer, you can *also* add properties onto the array:
+
+```js
+var myArray = [ "foo", 42, "bar" ];
+
+myArray.baz = "baz";
+
+myArray.length;	// 3
+
+myArray.baz;	// "baz"
+```
+
+Notice that adding named properties (regardless of `.` or `[ ]` operator syntax) does not change the reported `length` of the array.
+
+### Duplicating Objects
+
+One of the most commonly requested features when developers newly take up the JavaScript language is how to duplicate an object. It would seem like there should just be a built-in copy() method, right? It turns out that it's a little more complicated than that, because it's not fully clear what, by default, should be the algorithm for the duplication.
+
+For example, consider this object:
+
+```js
+function anotherFunction() { /*..*/ }
+
+var anotherObject = {
+	c: true
+};
+
+var anotherArray = [];
+
+var myObject = {
+	a: 2,
+	b: anotherObject,	// reference, not a copy!
+	c: anotherArray,	// another reference!
+	d: anotherFunction
+};
+
+anotherArray.push( anotherObject, myObject );
+```
+What exactly should be the representation of a *copy* of `myObject`?
+
+Firstly, we should answer if it should be a *shallow* or *deep* copy. A *shallow copy* would end up with `a` on the new object as a copy of the value `2`, but `b`, `c`, and `d` properties as just references to the same places as the references in the original object. A *deep copy* would duplicate not only `myObject`, but `anotherObject` and `anotherArray`. But then we have issues that `anotherArray` has references to `anotherObject` and `myObject` in it, so *those* should also be duplicated rather than reference-preserved. Now we have an infinite circular duplication problem because of the circular reference.
+
+One subset solution is that objects which are JSON-safe can easily be *duplicated* with:
+
+```js
+var newObj = JSON.parse( JSON.stringify( someObj ) );
+```
+
+ofc only if your object is JSON safe. For some situations, that's trivial. For others, it's insufficient.
+
+### Property Descriptors
+
+As of ES5, all properties are described in terms of a __property descriptor.
+
+Consider this code:
+
+```js
+var myObject = {
+	a: 2
+};
+
+Object.getOwnPropertyDescriptor( myObject, "a" );
+// {
+//    value: 2,
+//    writable: true,
+//    enumerable: true,
+//    configurable: true
+// }
+```
+As you can see, the property descriptor (called a "data descriptor" since it's only for holding a data value) for our normal object property `a` is much more than just its `value` of `2`. It includes 3 other characteristics: `writable`, `enumerable`, and `configurable`.
+
+We can use `Object.defineProperty(..)` to add a new property, or modify an existing one, with the desired characteristics.
+
+For example:
+
+```js
+var myObject = {};
+
+Object.defineProperty( myObject, "a", {
+	value: 2,
+	writable: true,
+	configurable: true,
+	enumerable: true
+} );
+
+myObject.a; // 2
+```
+#### Writable
+
+The ability for you to change the value of a property is controlled by `writable`.
+
+Consider:
+
+```js
+var myObject = {};
+
+Object.defineProperty( myObject, "a", {
+	value: 2,
+	writable: false, // not writable!
+	configurable: true,
+	enumerable: true
+} );
+
+myObject.a = 3;
+
+myObject.a; // 2
+```
+
+As you can see, our modification of the `value` silently failed. If we try in `strict mode`, we get an error:
+
+```js
+"use strict";
+
+var myObject = {};
+
+Object.defineProperty( myObject, "a", {
+	value: 2,
+	writable: false, // not writable!
+	configurable: true,
+	enumerable: true
+} );
+
+myObject.a = 3; // TypeError
+```
+
+The `TypeError` tells us we cannot change a non-writable property.
+
+#### Configurable
+
+As long as a property is currently configurable, we can modify its descriptor definition, using the same `defineProperty(..)` utility.
+
+```js
+var myObject = {
+	a: 2
+};
+
+myObject.a = 3;
+myObject.a;					// 3
+
+Object.defineProperty( myObject, "a", {
+	value: 4,
+	writable: true,
+	configurable: false,	// not configurable!
+	enumerable: true
+} );
+
+myObject.a;					// 4
+myObject.a = 5;
+myObject.a;					// 5
+
+Object.defineProperty( myObject, "a", {
+	value: 6,
+	writable: true,
+	configurable: true,
+	enumerable: true
+} ); // TypeError
+```
+
+The final `defineProperty(..)` call results in a TypeError, regardless of `strict mode`, if you attempt to change the descriptor definition of a non-configurable property. Be careful: as you can see, changing `configurable` to `false` is a **one-way action, and cannot be undone!**
+
+#### Enumerable
+
+The final descriptor characteristic we will mention here is `enumerable`.
+
+All normal user-defined properties are defaulted to `enumerable`, as this is most commonly what you want. But if you have a special property you want to hide from enumeration, set it to `enumerable:false`.
+
+### Immutability
