@@ -1,3 +1,8 @@
+1. [Chapter 1: this Or That?](https://github.com/jessiemasonx/frontend/blob/master/You-Dont-Know-JS:%20this%20&%20object%20prototypes.md#chapter-1-this-or-that)
+2. [Chapter 2: this All Makes Sense Now!](https://github.com/jessiemasonx/frontend/blob/master/You-Dont-Know-JS:%20this%20&%20object%20prototypes.md#chapter-2-this-all-makes-sense-now)
+3. [Chapter 3: Objects](https://github.com/jessiemasonx/frontend/blob/master/You-Dont-Know-JS:%20this%20&%20object%20prototypes.md#chapter-3-objects)
+4. [Chapter 4: Mixing (Up) "Class" Objects](https://github.com/jessiemasonx/frontend/blob/master/You-Dont-Know-JS:%20this%20&%20object%20prototypes.md#chapter-4-mixing-up-class-objects)
+
 # Chapter 1: this Or That?
 
 De __this__ keyword. Het is een speciaal identifier keyword dat automatisch wordt gedefinieerd in de scope van elke functie, maar wat het previes doet hebben developers zelfs moeite mee.
