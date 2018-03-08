@@ -430,3 +430,128 @@ Determining the `this` binding for an executing function requires finding the di
 Be careful of accidental/unintentional invoking of the *default binding* rule. In cases where you want to "safely" ignore a `this` binding, a "DMZ" object like `ø = Object.create(null)` is a good placeholder value that protects the `global` object from unintended side-effects.
 
 Instead of the four standard binding rules, ES6 arrow-functions use lexical scoping for `this` binding, which means they adopt the `this` binding (whatever it is) from its enclosing function call. They are essentially a syntactic replacement of `self = this` in pre-ES6 coding.
+
+
+# Chapter 3: Objects
+
+What exactly are objects, and why do we need to point to them?
+
+## Syntax
+
+Objects come in two forms: __the declarative (literal) form, and the constructed form__.
+
+The literal syntax for an object looks like this:
+```js
+var myObj = {
+	key: value
+	// ...
+};
+```
+The constructed form looks like this:
+```js
+var myObj = new Object();
+myObj.key = value;
+```
+
+The only difference really is that you can add one or more key/value pairs to the literal declaration, whereas with constructed-form objects, you must add the properties one-by-one.
+
+## Type
+
+Objects are the general building block upon which much of JS is built. They are one of the 6 primary types (called "language types" in the specification) in JS:
+
+- string
+- number
+- boolean
+- null
+- undefined
+- object
+
+__It's a common mis-statement that "everything in JavaScript is an object". This is clearly not true.__  
+ there are a few special object sub-types, which we can refer to as *complex primitives.
+ 
+### Built-in Objects
+
+There are several other object sub-types, usually referred to as built-in objects.
+
+- String
+- Number
+- Boolean
+- Object
+- Function
+- Array
+- Date
+- RegExp
+- Error
+
+## Contents
+
+As mentioned earlier, the contents of an object consist of values (any type) stored at specifically named *locations*, which we call properties.
+
+Consider:
+```js
+var myObject = {
+	a: 2
+};
+
+myObject.a;		// 2
+
+myObject["a"];	// 2
+```
+
+To access the value at the location `a` in `myObject`, we need to use either the `.` operator or the `[ ]` operator. The .a syntax is usually referred to as "property" access, whereas the `["a"]` syntax is usually referred to as "key" access. In reality, they both access the same location, and will pull out the same value, `2`, so the terms can be used interchangeably.
+
+The main difference between the two syntaxes is that the `.` operator requires an Identifier compatible property name after it, whereas the `[".."]` syntax can take basically any UTF-8/unicode compatible string as the name for the property. To reference a property of the name "Super-Fun!", for instance, you would have to use the `["Super-Fun!"]` access syntax, as `Super-Fun!` is not a valid `Identifier` property name.
+
+### Computed Property Names
+
+The `myObject[..]` property access syntax we just described is useful if you need to use a computed expression value *as* the key name, like `myObject[prefix + name]`. But that's not really helpful when declaring objects using the object-literal syntax.
+
+ES6 adds *computed property names*, where you can specify an expression, surrounded by a `[ ]` pair, in the key-name position of an object-literal declaration:
+
+```js
+var prefix = "foo";
+
+var myObject = {
+	[prefix + "bar"]: "hello",
+	[prefix + "baz"]: "world"
+};
+
+myObject["foobar"]; // hello
+myObject["foobaz"]; // world
+```
+
+Symbols are a new primitive data type which has an opaque unguessable value. You will be strongly discouraged from working with the actual value of a Symbol, so the name of the Symbol, like Symbol.Something, will be what you use:
+```js
+var myObject = {
+	[Symbol.Something]: "hello world"
+};
+```
+
+### Property vs. Method
+
+It *is* true that some functions have `this` references in them, and that *sometimes* these `this` references refer to the object reference at the call-site. But this usage really does not make that function any more a "method" than any other function, as `this` is dynamically bound at run-time, at the call-site, and thus its relationship to the object is indirect, at best.
+
+Every time you access a property on an object, that is a **property access**, regardless of the type of value you get back. If you *happen* to get a function from that property access, it's not magically a "method" at that point. There's nothing special (outside of possible implicit `this` binding as explained earlier) about a function that comes from a property access.
+
+For instance:
+
+```js
+function foo() {
+	console.log( "foo" );
+}
+
+var someFoo = foo;	// variable reference to `foo`
+
+var myObject = {
+	someFoo: foo
+};
+
+foo;				// function foo(){..}
+
+someFoo;			// function foo(){..}
+
+myObject.someFoo;	// function foo(){..}
+```
+someFoo and myObject.someFoo are just two separate references to the same function, and neither implies anything about the function being special or "owned" by any other object. If foo() above was defined to have a this reference inside it, that myObject.someFoo implicit binding would be the only observable difference between the two references. Neither reference really makes sense to be called a "method".
+
+### Arrays
