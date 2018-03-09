@@ -4,6 +4,7 @@
 2. [Chapter 2: this All Makes Sense Now!](https://github.com/jessiemasonx/frontend/blob/master/You-Dont-Know-JS:%20this%20&%20object%20prototypes.md#chapter-2-this-all-makes-sense-now)
 3. [Chapter 3: Objects](https://github.com/jessiemasonx/frontend/blob/master/You-Dont-Know-JS:%20this%20&%20object%20prototypes.md#chapter-3-objects)
 4. [Chapter 4: Mixing (Up) "Class" Objects](https://github.com/jessiemasonx/frontend/blob/master/You-Dont-Know-JS:%20this%20&%20object%20prototypes.md#chapter-4-mixing-up-class-objects)
+5. [Chapter 5: Prototypes](https://github.com/jessiemasonx/frontend/blob/master/You-Dont-Know-JS:%20this%20&%20object%20prototypes.md#chapter-5-prototypes)
 
 # Chapter 1: this Or That?
 
