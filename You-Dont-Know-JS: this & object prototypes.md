@@ -8,6 +8,11 @@
 
 # Chapter 1: this Or That?
 
+1. [Why ‘this’?](https://github.com/jessiemasonx/frontend/blob/master/You-Dont-Know-JS:%20this%20&%20object%20prototypes.md#why-this)
+2. [Confusions](https://github.com/jessiemasonx/frontend/blob/master/You-Dont-Know-JS:%20this%20&%20object%20prototypes.md#confusions)
+3. [What's ‘this’?](https://github.com/jessiemasonx/frontend/blob/master/You-Dont-Know-JS:%20this%20&%20object%20prototypes.md#whats-this)
+4. [Review](https://github.com/jessiemasonx/frontend/blob/master/You-Dont-Know-JS:%20this%20&%20object%20prototypes.md#review)
+
 De __this__ keyword. Het is een speciaal identifier keyword dat automatisch wordt gedefinieerd in de scope van elke functie, maar wat het previes doet hebben developers zelfs moeite mee.
 
 
