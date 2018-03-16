@@ -729,3 +729,133 @@ Inventing ad hoc logic to solve these trust issues is possible, but it's more di
 We need a generalized solution to **all of the trust issues**, one that can be reused for as many callbacks as we create without all the extra boilerplate overhead.
 
 We need something better than callbacks. They've served us well to this point, but the *future* of JavaScript demands more sophisticated and capable async patterns. The subsequent chapters in this book will dive into those emerging evolutions.
+
+# Chapter 3: Promises
+
+Recall that we wrap up the *continuation* of our program in a callback function, and hand that callback over to another party (potentially even external code) and just cross our fingers that it will do the right thing with the invocation of the callback.
+
+We do this because we want to say, "here's what happens *later*, after the current step finishes."
+
+But what if we could uninvert that *inversion of control*? What if instead of handing the continuation of our program to another party, we could expect it to return us a capability to know when its task finishes, and then our code could decide what to do next?
+
+This paradigm is called **Promises**.
+
+## What Is a Promise?
+
+### Future Value
+
+> voorbeeld scenario
+
+Imagine this scenario: I walk up to the counter at a fast-food restaurant, and place an order for a cheeseburger. I hand the cashier $1.47. By placing my order and paying for it, I've made a request for a *value* back (the cheeseburger). I've started a transaction.
+
+But often, the cheeseburger is not immediately available for me. The cashier hands me something in place of my cheeseburger: a receipt with an order number on it. This order number is an IOU ("I owe you") *promise* that ensures that eventually, I should receive my cheeseburger.
+
+So I hold onto my receipt and order number. I know it represents my *future cheeseburger*, so I don't need to worry about it anymore -- aside from being hungry!
+
+While I wait, I can do other things, like send a text message to a friend that says, "Hey, can you come join me for lunch? I'm going to eat a cheeseburger."
+
+I am reasoning about my *future cheeseburger* already, even though I don't have it in my hands yet. My brain is able to do this because it's treating the order number as a placeholder for the cheeseburger. The placeholder essentially makes the value *time independent*. It's a **future value**.
+
+Eventually, I hear, "Order 113!" and I gleefully walk back up to the counter with receipt in hand. I hand my receipt to the cashier, and I take my cheeseburger in return.
+
+In other words, once my *future value* was ready, I exchanged my value-promise for the value itself.
+
+But there's another possible outcome. They call my order number, but when I go to retrieve my cheeseburger, the cashier regretfully informs me, "I'm sorry, but we appear to be all out of cheeseburgers." Setting aside the customer frustration of this scenario for a moment, we can see an important characteristic of *future values*: they can either indicate a success or failure.
+
+Every time I order a cheeseburger, I know that I'll either get a cheeseburger eventually, or I'll get the sad news of the cheeseburger shortage, and I'll have to figure out something else to eat for lunch.
+
+**Note:** In code, things are not quite as simple, because metaphorically the order number may never be called, in which case we're left indefinitely in an unresolved state. We'll come back to dealing with that case later.
+
+#### Values Now and Later
+
+When you write code to reason about a value, such as performing math on a `number`, whether you realize it or not, you've been assuming something very fundamental about that value, which is that it's a concrete *now* value already:
+
+```js
+var x, y = 2;
+
+console.log( x + y ); // NaN  <-- because `x` isn't set yet
+```
+
+The `x + y` operation assumes both `x` and `y` are already set. In terms we'll expound on shortly, we assume the `x` and `y` values are already *resolved*.
+
+If statement 2 relies on statement 1 being finished, there are just two outcomes: either statement 1 finished right now and everything proceeds fine, or statement 1 didn't finish yet, and thus statement 2 is going to fail.  
+Imagine if there was a way to say, "Add `x` and `y`, but if either of them isn't ready yet, just wait until they are. Add them as soon as you can."
+
+Your brain might have just jumped to callbacks. OK, so...
+
+```js
+function add(getX,getY,cb) {
+	var x, y;
+	getX( function(xVal){
+		x = xVal;
+		// both are ready?
+		if (y != undefined) {
+			cb( x + y );	// send along sum
+		}
+	} );
+	getY( function(yVal){
+		y = yVal;
+		// both are ready?
+		if (x != undefined) {
+			cb( x + y );	// send along sum
+		}
+	} );
+}
+
+// `fetchX()` and `fetchY()` are sync or async
+// functions
+add( fetchX, fetchY, function(sum){
+	console.log( sum ); // that was easy, huh?
+} );
+```
+
+In that snippet, we treated `x` and `y` as future values, and we express an operation `add(..)` that (from the outside) does not care whether `x` or `y` or both are available right away or not. In other words, it normalizes the *now* and *later*, such that we can rely on a predictable outcome of the `add(..)` operation.
+
+By using an `add(..)` that is temporally consistent -- it behaves the same across *now* and *later* times -- the async code is much easier to reason about.
+
+To put it more plainly: to consistently handle both *now* and *later*, we make both of them *later*: all operations become async.
+
+#### Promise Value
+
+let's just briefly glimpse at how we can express the `x + y` example via `Promise`s:
+
+```js
+function add(xPromise,yPromise) {
+	// `Promise.all([ .. ])` takes an array of promises,
+	// and returns a new promise that waits on them
+	// all to finish
+	return Promise.all( [xPromise, yPromise] )
+
+	// when that promise is resolved, let's take the
+	// received `X` and `Y` values and add them together.
+	.then( function(values){
+		// `values` is an array of the messages from the
+		// previously resolved promises
+		return values[0] + values[1];
+	} );
+}
+
+// `fetchX()` and `fetchY()` return promises for
+// their respective values, which may be ready
+// *now* or *later*.
+add( fetchX(), fetchY() )
+
+// we get a promise back for the sum of those
+// two numbers.
+// now we chain-call `then(..)` to wait for the
+// resolution of that returned promise.
+.then( function(sum){
+	console.log( sum ); // that was easier!
+} );
+```
+
+There are two layers of Promises in this snippet.
+
+`fetchX()` and `fetchY()` are called directly, and the values they return (promises!) are passed into `add(..)`. The underlying values those promises represent may be ready *now* or *later*, but each promise normalizes the behavior to be the same regardless. We reason about `X` and `Y` values in a time-independent way. They are *future values*.
+
+The second layer is the promise that `add(..)` creates (via `Promise.all([ .. ])`) and returns, which we wait on by calling `then(..)`. When the `add(..)` operation completes, our `sum` *future value* is ready and we can print it out. We hide inside of `add(..)` the logic for waiting on the `X` and `Y` *future values*.
+
+**Note:** Inside `add(..)`, the `Promise.all([ .. ])` call creates a promise (which is waiting on `promiseX` and `promiseY` to resolve). The chained call to `.then(..)` creates another promise, which the `return values[0] + values[1]` line immediately resolves (with the result of the addition). Thus, the `then(..)` call we chain off the end of the `add(..)` call -- at the end of the snippet -- is actually operating on that second promise returned, rather than the first one created by `Promise.all([ .. ])`. Also, though we are not chaining off the end of that second `then(..)`, it too has created another promise, had we chosen to observe/use it. This Promise chaining stuff will be explained in much greater detail later in this chapter.
+
+Just like with cheeseburger orders, it's possible that the resolution of a Promise is rejection instead of fulfillment. Unlike a fulfilled Promise, where the value is always programmatic, a rejection value -- commonly called a "rejection reason" -- can either be set directly by the program logic, or it can result implicitly from a runtime exception.
+
