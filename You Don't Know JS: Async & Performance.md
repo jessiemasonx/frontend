@@ -448,3 +448,284 @@ At any given moment, only one event can be processed from the queue at a time. W
 Concurrency is when two or more chains of events interleave over time, such that from a high-level perspective, they appear to be running *simultaneously* (even though at any given moment only one event is being processed).
 
 It's often necessary to do some form of interaction coordination between these concurrent "processes" (as distinct from operating system processes), for instance to ensure ordering or to prevent "race conditions." These "processes" can also *cooperate* by breaking themselves into smaller chunks and to allow other "process" interleaving.
+
+# Chapter 2: Callbacks
+
+## Continuations
+
+```js
+// A
+ajax( "..", function(..){
+	// C
+} );
+// B
+```
+
+`// A` and `// B` represent the first half of the program (aka the *now*), and `// C` marks the second half of the program (aka the *later*). The first half executes right away, and then there's a "pause" of indeterminate length. At some future moment, if the Ajax call completes, then the program will pick up where it left off, and *continue* with the second half.
+
+In other words, the callback function wraps or encapsulates the *continuation* of the program.
+
+## Sequential Brain
+
+When we *fake* multitasking, such as trying to type something at the same time we're talking to a friend or family member on the phone, what we're actually most likely doing is acting as fast context switchers. In other words, we switch back and forth between two or more tasks in rapid succession, *simultaneously* progressing on each task in tiny, fast little chunks. We do it so fast that to the outside world it appears as if we're doing these things *in parallel*.
+ __async evented concurrency __
+ 
+ ### Doing Versus Planning
+ 
+ OK, so our brains can be thought of as operating in single-threaded event loop queue like ways, as can the JS engine. That sounds like a good match.
+ 
+ When a developer writes code, they are planning out a set of actions to occur. If they're any good at being a developer, they're **carefully planning** it out. "I need to set `z` to the value of `x`, and then `x` to the value of `y`," and so forth.
+
+When we write out synchronous code, statement by statement, it works a lot like our errands to-do list:
+
+```js
+// swap `x` and `y` (via temp variable `z`)
+z = x;
+x = y;
+y = z;
+```
+
+These three assignment statements are synchronous, so `x = y` waits for `z = x` to finish, and `y = z` in turn waits for `x = y` to finish. Another way of saying it is that these three statements are temporally bound to execute in a certain order, one right after the other. Thankfully, we don't need to be bothered with any async evented details here. If we did, the code gets a lot more complex, quickly!
+
+So if synchronous brain planning maps well to synchronous code statements, how well do our brains do at planning out asynchronous code?
+
+The reason it's difficult for us as developers to write async evented code, especially when all we have is the callback to do it, is that stream of consciousness thinking/planning is unnatural for most of us.
+
+We think in step-by-step terms, but the tools (callbacks) available to us in code are not expressed in a step-by-step fashion once we move from synchronous to asynchronous.
+
+And **that** is why it's so hard to accurately author and reason about async JS code with callbacks: because it's not how our brain planning works.
+
+### Nested/Chained Callbacks
+
+Consider:
+
+```js
+listen( "click", function handler(evt){
+	setTimeout( function request(){
+		ajax( "http://some.url.1", function response(text){
+			if (text == "hello") {
+				handler();
+			}
+			else if (text == "world") {
+				request();
+			}
+		} );
+	}, 500) ;
+} );
+```
+
+This kind of code is often called "callback hell," and sometimes also referred to as the "pyramid of doom" (for its sideways-facing triangular shape due to the nested indentation).
+
+First, we're waiting for the "click" event, then we're waiting for the timer to fire, then we're waiting for the Ajax response to come back, at which point it might do it all again.
+
+At first glance, this code may seem to map its asynchrony naturally to sequential brain planning.
+
+First (*now*), we:
+
+```js
+listen( "..", function handler(..){
+	// ..
+} );
+```
+
+Then *later*, we:
+
+```js
+setTimeout( function request(..){
+	// ..
+}, 500) ;
+```
+
+Then still *later*, we:
+
+```js
+ajax( "..", function response(..){
+	// ..
+} );
+```
+
+And finally (most *later*), we:
+
+```js
+if ( .. ) {
+	// ..
+}
+else ..
+```
+
+But there's several problems with reasoning about this code linearly in such a fashion.
+
+## Trust Issues
+
+Let's once again revisit the notion of a callback function as the continuation (aka the second half) of our program:
+
+```js
+// A
+ajax( "..", function(..){
+	// C
+} );
+// B
+```
+
+`// A` and `// B` happen *now*, under the direct control of the main JS program. But `// C` gets deferred to happen *later*, and under the control of another party -- in this case, the `ajax(..)` function. In a basic sense, that sort of hand-off of control doesn't regularly cause lots of problems for programs.
+
+But don't be fooled by its infrequency that this control switch isn't a big deal. In fact, it's one of the worst (and yet most subtle) problems about callback-driven design. It revolves around the idea that sometimes `ajax(..)` (i.e., the "party" you hand your callback continuation to) is not a function that you wrote, or that you directly control. Many times, it's a utility provided by some third party.
+
+We call this __inversion of control,__ when you take part of your program and give over control of its execution to another third party. There's an unspoken "contract" that exists between your code and the third-party utility -- a set of things you expect to be maintained.
+
+
+### Tale of Five Callbacks
+
+It might not be terribly obvious why this is such a big deal. Let me construct an exaggerated scenario to illustrate the hazards of trust at play.
+
+Imagine you're a developer tasked with building out an ecommerce checkout system for a site that sells expensive TVs. You already have all the various pages of the checkout system built out just fine. On the last page, when the user clicks "confirm" to buy the TV, you need to call a third-party function (provided say by some analytics tracking company) so that the sale can be tracked.
+
+You notice that they've provided what looks like an async tracking utility, probably for the sake of performance best practices, which means you need to pass in a callback function. In this continuation that you pass in, you will have the final code that charges the customer's credit card and displays the thank you page.
+
+This code might look like:
+
+```js
+analytics.trackPurchase( purchaseData, function(){
+	chargeCreditCard();
+	displayThankyouPage();
+} );
+```
+
+One morning, you're at a coffee shop before work, casually enjoying your latte, when you get a panicked call from your boss insisting you drop the coffee and rush into work right away.
+
+When you arrive, you find out that a high-profile customer has had his credit card charged five times for the same TV, and he's understandably upset. Customer service has already issued an apology and processed a refund. But your boss demands to know how this could possibly have happened. "Don't we have tests for stuff like this!?"
+
+ou don't even remember the code you wrote. But you dig back in and start trying to find out what could have gone awry.
+
+After digging through some logs, you come to the conclusion that the only explanation is that the analytics utility somehow, for some reason, called your callback five times instead of once. Nothing in their documentation mentions anything about this.
+
+Frustrated, you contact customer support, who of course is as astonished as you are. They agree to escalate it to their developers, and promise to get back to you. The next day, you receive a lengthy email explaining what they found, which you promptly forward to your boss.
+
+Apparently, the developers at the analytics company had been working on some experimental code that, under certain conditions, would retry the provided callback once per second, for five seconds, before failing with a timeout. They had never intended to push that into production, but somehow they did, and they're totally embarrassed and apologetic. They go into plenty of detail about how they've identified the breakdown and what they'll do to ensure it never happens again. Yadda, yadda.
+
+What's next?
+
+You talk it over with your boss, but he's not feeling particularly comfortable with the state of things. He insists, and you reluctantly agree, that you can't trust them anymore (that's what bit you), and that you'll need to figure out how to protect the checkout code from such a vulnerability again.
+
+After some tinkering, you implement some simple ad hoc code like the following, which the team seems happy with:
+
+var tracked = false;
+
+analytics.trackPurchase( purchaseData, function(){
+	if (!tracked) {
+		tracked = true;
+		chargeCreditCard();
+		displayThankyouPage();
+	}
+} );
+
+### Not Just Others' Code
+
+So, contemplate this: can you even *really* trust utilities that you do theoretically control (in your own code base)?
+
+Think of it this way: most of us agree that at least to some extent we should build our own internal functions with some defensive checks on the input parameters, to reduce/prevent unexpected issues.
+
+Overly trusting of input:
+```js
+function addNumbers(x,y) {
+	// + is overloaded with coercion to also be
+	// string concatenation, so this operation
+	// isn't strictly safe depending on what's
+	// passed in.
+	return x + y;
+}
+
+addNumbers( 21, 21 );	// 42
+addNumbers( 21, "21" );	// "2121"
+```
+
+Defensive against untrusted input:
+```js
+function addNumbers(x,y) {
+	// ensure numerical input
+	if (typeof x != "number" || typeof y != "number") {
+		throw Error( "Bad parameters" );
+	}
+
+	// if we get here, + will safely do numeric addition
+	return x + y;
+}
+
+addNumbers( 21, 21 );	// 42
+addNumbers( 21, "21" );	// Error: "Bad parameters"
+```
+
+Or perhaps still safe but friendlier:
+```js
+function addNumbers(x,y) {
+	// ensure numerical input
+	x = Number( x );
+	y = Number( y );
+
+	// + will safely do numeric addition
+	return x + y;
+}
+
+addNumbers( 21, 21 );	// 42
+addNumbers( 21, "21" );	// 42
+```
+
+However you go about it, these sorts of checks/normalizations are fairly common on function inputs, even with code we theoretically entirely trust. In a crude sort of way, it's like the programming equivalent of the geopolitical principle of "Trust But Verify."
+
+So, doesn't it stand to reason that we should do the same thing about composition of async function callbacks, not just with truly external code but even with code we know is generally "under our own control"? **Of course we should.**
+
+## Trying to Save Callbacks
+
+Regarding more graceful error handling, some API designs provide for split callbacks (one for the success notification, one for the error notification):
+
+```js
+function success(data) {
+	console.log( data );
+}
+
+function failure(err) {
+	console.error( err );
+}
+
+ajax( "http://some.url.1", success, failure );
+```
+
+In APIs of this design, often the `failure()` error handler is optional, and if not provided it will be assumed you want the errors swallowed. Ugh.
+
+Another common callback pattern is called "error-first style" (sometimes called "Node style," as it's also the convention used across nearly all Node.js APIs), where the first argument of a single callback is reserved for an error object (if any). If success, this argument will be empty/falsy (and any subsequent arguments will be the success data), but if an error result is being signaled, the first argument is set/truthy (and usually nothing else is passed):
+
+```js
+function response(err,data) {
+	// error?
+	if (err) {
+		console.error( err );
+	}
+	// otherwise, assume success
+	else {
+		console.log( data );
+	}
+}
+
+ajax( "http://some.url.1", response );
+```
+
+In both of these cases, several things should be observed.
+
+First, it has not really resolved the majority of trust issues like it may appear. 
+Also, don't miss the fact that while it's a standard pattern you can employ, it's definitely more verbose and boilerplate-ish without much reuse, so you're going to get weary of typing all that out for every single callback in your application.
+
+## Review
+
+Callbacks are the fundamental unit of asynchrony in JS. But they're not enough for the evolving landscape of async programming as JS matures.
+
+First, our brains plan things out in sequential, blocking, single-threaded semantic ways, but callbacks express asynchronous flow in a rather nonlinear, nonsequential way, which makes reasoning properly about such code much harder. Bad to reason about code is bad code that leads to bad bugs.
+
+We need a way to express asynchrony in a more synchronous, sequential, blocking manner, just like our brains do.
+
+Second, and more importantly, callbacks suffer from *inversion of control* in that they implicitly give control over to another party (often a third-party utility not in your control!) to invoke the *continuation* of your program. This control transfer leads us to a troubling list of trust issues, such as whether the callback is called more times than we expect.
+
+Inventing ad hoc logic to solve these trust issues is possible, but it's more difficult than it should be, and it produces clunkier and harder to maintain code, as well as code that is likely insufficiently protected from these hazards until you get visibly bitten by the bugs.
+
+We need a generalized solution to **all of the trust issues**, one that can be reused for as many callbacks as we create without all the extra boilerplate overhead.
+
+We need something better than callbacks. They've served us well to this point, but the *future* of JavaScript demands more sophisticated and capable async patterns. The subsequent chapters in this book will dive into those emerging evolutions.
