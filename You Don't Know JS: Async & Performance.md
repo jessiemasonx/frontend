@@ -868,3 +868,87 @@ Promises are awesome. Use them. They solve the inversion of control issues that 
 They don't get rid of callbacks, they just redirect the orchestration of those callbacks to a trustable intermediary mechanism that sits between us and another utility.
 
 Promise chains also begin to address (though certainly not perfectly) a better way of expressing async flow in sequential fashion, which helps our brains plan and maintain async JS code better. We'll see an even better solution to that problem in the next chapter!
+
+## Uitleg filmpie
+
+```js
+let cleanRoom = function() {
+  return new Promise(function(resolve, reject) {
+    resolve('Cleaned The Room');
+  });
+};
+
+let removeGarbage = function(message) {
+  return new Promise(function(resolve, reject) {
+    resolve(message + ' remove Garbage');
+  });
+};
+
+let winIcecream = function(message) {
+  return new Promise(function(resolve, reject) {
+    resolve( message + ' won Icecream');
+  });
+};
+
+cleanRoom().then(function(result){ 			// na cleanRoom() gaat ie naar removeGarbage()
+	return removeGarbage(result);
+}).then(function(result){				// na removeGarbage() gaat ie naar winIcecream()
+	return winIcecream(result);
+}).then(function(result){
+	console.log('finished ' + result);		// na winIcecream staat er finished, en dan de results achter elkaar.
+})
+```
+De result is hier oer functie aangegeven, die komt op het eind dan terug.  In `result` onderaan wordt die result steeds teruggepakt uit de functies.  
+Als je promises in dit geval niet gebruikte was het 1 dikke callback function. Door Promises is de code clean.
+
+# Generators
+
+Ze hebben een sterretje. *  
+Dan weet JS dat 'hey dit is een generator en geen normale functie'  
+
+Done is een waarde bij iterators en die is `true` of `false`. Als ie `false` is moet ie nog een paar waardes afgaan, en als ie `true` is heeft is ie langs alle waardes geweest. 
+
+```js
+function *generator(){ 			// HEY dit is een generator
+yield 1;			
+yield 2;
+yield 3;
+yield 3;
+};
+
+
+let iterator = generator();
+
+console.log(iterator.next());			// done = false, waarde 1
+console.log(iterator.next());			// done = false, waarde 2
+console.log(iterator.next());			// done = false, waarde 3
+console.log(iterator.next());			// done = false, waarde 4
+console.log(iterator.next());			// done = true, geen waardes meer over
+```
+
+Het mooie aan dit is dat hey na elke `yield` stopt. Het pauzeert. Tot je dus weer de volgende console log next ding doet. Dan gaat ie pas naar de volgende.
+
+Check hieronder een ander voorbeeld met een loop.
+
+```js
+function *infiniteMaker() {
+
+	let i = 0;				// HEY een while loop. 
+	while (true) {
+		yield i;
+		i++;
+	}
+}
+
+let iterator = infiniteMaker();
+
+console.log(iterator.next());			// done = false
+console.log(iterator.next());			// done = false
+console.log(iterator.next());			// done = false
+console.log(iterator.next());			// done = false
+console.log(iterator.next());			// done = false
+console.log(iterator.next());			// done = false
+console.log(iterator.next());			// done = false
+```
+Okee dus dit is een ander verhaal. Je zou denken de loop is oneindig, maar door de generator issie dat niet. Hij gaat nog steeds pas naar de volgende waarde als je `.next` doet. Toch blijft `done` wel `false` omdat er door de loop altijd wel een volgende waarde is.  
+Dus door de generator pauzeert hij steeds na elke waarde.
