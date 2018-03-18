@@ -965,6 +965,10 @@ Dus door de generator pauzeert hij steeds na elke waarde.
 
 # Chapter 5: Program Performance
 
+[Web Workers](https://github.com/jessiemasonx/frontend/blob/master/You%20Don't%20Know%20JS:%20Async%20&%20Performance.md#web-workers)  
+[Review](https://github.com/jessiemasonx/frontend/blob/master/You%20Don't%20Know%20JS:%20Async%20&%20Performance.md#review-3)  
+[Aantekeningen Video](https://github.com/jessiemasonx/frontend/blob/master/You%20Don't%20Know%20JS:%20Async%20&%20Performance.md#aantekeningen-video)
+
 Asynchrony really matters in JS because of __performance__. 
 
 ## Web Workers
