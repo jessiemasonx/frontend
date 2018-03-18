@@ -952,3 +952,104 @@ console.log(iterator.next());			// done = false
 ```
 Okee dus dit is een ander verhaal. Je zou denken de loop is oneindig, maar door de generator issie dat niet. Hij gaat nog steeds pas naar de volgende waarde als je `.next` doet. Toch blijft `done` wel `false` omdat er door de loop altijd wel een volgende waarde is.  
 Dus door de generator pauzeert hij steeds na elke waarde.
+
+# Chapter 5: Program Performance
+
+Asynchrony really matters in JS because of __performance__. 
+
+## Web Workers
+
+__Web Workers__ is a feature of the browser and actually has almost nothing to do with the JS language itself.
+  
+ An environment like your browser can easily provide multiple instances of the JavaScript engine, each on its own thread, and let you run a different program in each thread. Each of those separate threaded pieces of your program is called a "(Web) Worker." This type of parallelism is called __task parallelism,__ as the emphasis is on splitting up chunks of your program to run in parallel.
+ 
+ From your main JS program (or another Worker), you instantiate a Worker like so:
+
+```js
+var w1 = new Worker( "http://some.url.1/mycoolworker.js" );
+```
+
+The URL should point to the location of a JS file (not an HTML page!) which is intended to be loaded into a Worker. The browser will then spin up a separate thread and let that file run as an independent program in that thread.
+
+The `w1` Worker object is an event listener and trigger, which lets you subscribe to events sent by the Worker as well as send events to the Worker.
+
+Here's how to listen for events (actually, the fixed `"message"` event):
+
+```js
+w1.addEventListener( "message", function(evt){
+	// evt.data
+} );
+```
+
+And you can send the `"message"` event to the Worker:
+
+```js
+w1.postMessage( "something cool to say" );
+```
+
+Inside the Worker, the messaging is totally symmetrical:
+
+```js
+// "mycoolworker.js"
+
+addEventListener( "message", function(evt){
+	// evt.data
+} );
+
+postMessage( "a really cool reply" );
+```
+
+Notice that a dedicated Worker is in a one-to-one relationship with the program that created it. That is, the `"message"` event doesn't need any disambiguation here, because we're sure that it could only have come from this one-to-one relationship -- either it came from the Worker or the main page.
+
+## Review
+
+Web Workers let you run a JS file (aka program) in a separate thread using async events to message between the threads. They're wonderful for offloading long-running or resource-intensive tasks to a different thread, leaving the main UI thread more responsive.
+
+SIMD proposes to map CPU-level parallel math operations to JavaScript APIs for high-performance data-parallel operations, like number processing on large data sets.
+
+Finally, asm.js describes a small subset of JavaScript that avoids the hard-to-optimize parts of JS (like garbage collection and coercion) and lets the JS engine recognize and run such code through aggressive optimizations. asm.js could be hand authored, but that's extremely tedious and error prone, akin to hand authoring assembly language (hence the name). Instead, the main intent is that asm.js would be a good target for cross-compilation from other highly optimized program languages -- for example, Emscripten (https://github.com/kripken/emscripten/wiki) transpiling C/C++ to JavaScript.
+
+While not covered explicitly in this chapter, there are even more radical ideas under very early discussion for JavaScript, including approximations of direct threaded functionality (not just hidden behind data structure APIs). Whether that happens explicitly, or we just see more parallelism creep into JS behind the scenes, the future of more optimized program-level performance in JS looks really promising.
+
+## Aantekeningen video
+ 
+[Video nog een keer bekijken](https://www.youtube.com/watch?v=pMK-jcOAYI8&t=396s)
+
+Web Worker provides a mechanism to make a seperate script in background for your web application. Where you can do any complex calculation without disturbing the UI. 
+
+There is communication between the page and the worker. 
+```js
+postmessage(); 		// send message
+onmessage();		// receive message
+```
+
+Bekijk hier het voorbeeld uit de video:
+```js
+if (window.Worker) {					// if the webworker functionality is available for the browser
+	var myWorker = new Worker("worker.js");		// all the worker code goes in that file
+	
+	var message = { addThis {num1:1, num2:1} };	// 2 numbers in a property. 
+	
+	myWorker.postMessage(message)			// sending the object 'message' from above to the web worker
+	
+	myWorker.onmessage = funtion(e) {		// bij onmessage komt het antwoord van de worker
+		console.dir(e.data.result);
+	};
+
+}
+```
+Zie hier onder worker.js:
+```js
+this.onmessage = function(e) { 		
+// simple function called onmessage which is waiting for activity from other page
+	if(e.data.addThis !== undefined) { 			// checkt of hij available is
+		this.postMessage({result: e.data.addThis.num1 + e.data.addThis.num2});
+	}
+	
+	//
+};
+```
+Waar hij de functie aan maakt ontvangt hij tussen die haakjes objecet `e`. Het is een wrapped object en het heeft de`data` property, en die heeft het object `addThis` uit het andere bestand.  
+Dan checkt hij of hij available is en als dat zo is doet hij de 2 nummers bij elkaar en zet die in een ander object dat result heet. Hij doet `postMessage` dus het gaat terug naar de andere pagina. 
+
+In het eerste bestandje zie je onderin de `onmessage` functie, en die wacht op het antwoord van de worker. Hier komt dus de `result`. 
