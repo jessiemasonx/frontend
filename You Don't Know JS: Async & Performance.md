@@ -1,10 +1,10 @@
 # You Don't Know JS: Async & Performance
 
-1. [Chapter 1: Asynchrony: Now & Later](https://github.com/jessiemasonx/frontend/blob/master/You%20Don't%20Know%20JS:%20Async%20&%20Performance.md#chapter-1-asynchrony-now--later)
-2. [Chapter 2: Callbacks](https://github.com/jessiemasonx/frontend/blob/master/You%20Don't%20Know%20JS:%20Async%20&%20Performance.md#chapter-2-callbacks)
-3. [Chapter 3: Promises](https://github.com/jessiemasonx/frontend/blob/master/You%20Don't%20Know%20JS:%20Async%20&%20Performance.md#chapter-3-promises)
+1. [Asynchrony: Now & Later](https://github.com/jessiemasonx/frontend/blob/master/You%20Don't%20Know%20JS:%20Async%20&%20Performance.md#chapter-1-asynchrony-now--later)
+2. [Callbacks](https://github.com/jessiemasonx/frontend/blob/master/You%20Don't%20Know%20JS:%20Async%20&%20Performance.md#chapter-2-callbacks)
+3. [Promises](https://github.com/jessiemasonx/frontend/blob/master/You%20Don't%20Know%20JS:%20Async%20&%20Performance.md#chapter-3-promises)
 4. [Generators](https://github.com/jessiemasonx/frontend/blob/master/You%20Don't%20Know%20JS:%20Async%20&%20Performance.md#generators)
-5. [Chapter 5: Program Performance](https://github.com/jessiemasonx/frontend/blob/master/You%20Don't%20Know%20JS:%20Async%20&%20Performance.md#chapter-5-program-performance)
+5. [Program Performance](https://github.com/jessiemasonx/frontend/blob/master/You%20Don't%20Know%20JS:%20Async%20&%20Performance.md#chapter-5-program-performance)
 
 # Chapter 1: Asynchrony: Now & Later
 
