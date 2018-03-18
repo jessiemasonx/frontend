@@ -871,6 +871,8 @@ Promise chains also begin to address (though certainly not perfectly) a better w
 
 ## Uitleg filmpie
 
+[Check het filmpje nog een keer](https://www.youtube.com/watch?v=s6SH72uAn3Q)
+
 ```js
 let cleanRoom = function() {
   return new Promise(function(resolve, reject) {
@@ -902,6 +904,8 @@ De result is hier oer functie aangegeven, die komt op het eind dan terug.  In `r
 Als je promises in dit geval niet gebruikte was het 1 dikke callback function. Door Promises is de code clean.
 
 # Generators
+
+[Filmpie](https://www.youtube.com/watch?v=TJpkYvSREtM&t=203s)
 
 Ze hebben een sterretje. *  
 Dan weet JS dat 'hey dit is een generator en geen normale functie'  
