@@ -1067,3 +1067,54 @@ Waar hij de functie aan maakt ontvangt hij tussen die haakjes objecet `e`. Het i
 Dan checkt hij of hij available is en als dat zo is doet hij de 2 nummers bij elkaar en zet die in een ander object dat result heet. Hij doet `postMessage` dus het gaat terug naar de andere pagina. 
 
 In het eerste bestandje zie je onderin de `onmessage` functie, en die wacht op het antwoord van de worker. Hier komt dus de `result`. 
+
+# Benchmarking & Tuning
+
+## Review
+
+Effectively benchmarking performance of a piece of code, especially to compare it to another option for that same code to see which approach is faster, requires careful attention to detail.
+
+Rather than rolling your own statistically valid benchmarking logic, just use the Benchmark.js library, which does that for you. But be careful about how you author tests, because it's far too easy to construct a test that seems valid but that's actually flawed -- even tiny differences can skew the results to be completely unreliable.
+
+It's important to get as many test results from as many different environments as possible to eliminate hardware/device bias. jsPerf.com is a fantastic website for crowdsourcing performance benchmark test runs.
+
+Many common performance tests unfortunately obsess about irrelevant microperformance details like `x++` versus `++x`. Writing good tests means understanding how to focus on big picture concerns, like optimizing on the critical path, and avoiding falling into traps like different JS engines' implementation details.
+
+Tail call optimization (TCO) is a required optimization as of ES6 that will make some recursive patterns practical in JS where they would have been impossible otherwise. TCO allows a function call in the tail position of another function to execute without needing any extra resources, which means the engine no longer needs to place arbitrary restrictions on call stack depth for recursive algorithms.
+
+## Benchmarking
+
+De meeste JS developers, als ze werden gevraagd om de snelheid van de operation te *benchmarken*, zouden ongeveer zoiets doen:
+
+```js
+var start = (new Date()).getTime();	// or `Date.now()`
+
+// do some operation
+
+var end = (new Date()).getTime();
+
+console.log( "Duration:", (end - start) );
+```
+
+Er is veel __fout__ aan __deze code__.
+
+__Here's how you could use Benchmark.js to run a quick performance test:__
+
+```js
+function foo() {
+	// operation(s) to test
+}
+
+var bench = new Benchmark(
+	"foo test",				// test name
+	foo,					// function to test (just contents)
+	{
+		// ..				// optional extra options (see docs)
+	}
+);
+
+bench.hz;					// number of operations per second
+bench.stats.moe;			// margin of error
+bench.stats.variance;		// variance across samples
+// ..
+```
