@@ -5,6 +5,7 @@
 3. [Promises](https://github.com/jessiemasonx/frontend/blob/master/You%20Don't%20Know%20JS:%20Async%20&%20Performance.md#chapter-3-promises)
 4. [Generators](https://github.com/jessiemasonx/frontend/blob/master/You%20Don't%20Know%20JS:%20Async%20&%20Performance.md#generators)
 5. [Program Performance](https://github.com/jessiemasonx/frontend/blob/master/You%20Don't%20Know%20JS:%20Async%20&%20Performance.md#chapter-5-program-performance)
+6. [Benchmarking & Tuning](https://github.com/jessiemasonx/frontend/blob/master/You%20Don't%20Know%20JS:%20Async%20&%20Performance.md#benchmarking--tuning)
 
 # Chapter 1: Asynchrony: Now & Later
 
