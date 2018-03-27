@@ -61,14 +61,16 @@ Hier staat er `this` ipv clown. In deze scope wordt `this` automatisch gegeneree
  Een `const` kan niet veranderen van type, maar kan wel een andere waarde krijgen. 
  
  `var body = document.body`
- nu hebben we een html element  
- ```js
+nu hebben we een html element  
+```js
  body.addEventlistener('click', function(){
  
  console.log('de body was clicked') 
  })'
- ```
- Dit is een `callback function` want je roept hem pas aan als er wordt geklikt.
+```
+Dit is een `callback function` want je roept hem pas aan als er wordt geklikt.
  
- arrow function `=>`
-Als je this doet in de arrow function dan verwijst ie niet naar de functie maar naar de context er buiten. Dus bij het voorbeeld in de les verwees `this` naar the Window. 
+arrow function `=>`
+Als je this doet in de arrow function dan verwijst ie niet naar de functie maar naar de context er buiten. Dus bij het voorbeeld in de les verwees `this` naar the Window.
+
+
