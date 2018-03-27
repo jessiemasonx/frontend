@@ -72,5 +72,3 @@ Dit is een `callback function` want je roept hem pas aan als er wordt geklikt.
  
 arrow function `=>`
 Als je this doet in de arrow function dan verwijst ie niet naar de functie maar naar de context er buiten. Dus bij het voorbeeld in de les verwees `this` naar the Window.
-
-
