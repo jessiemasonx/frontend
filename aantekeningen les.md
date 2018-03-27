@@ -47,3 +47,28 @@ console.log('Ik heet ' + this.name + ' whoehahahaha') // ik heet pipo whoehahaha
 
 Hier staat er `this` ipv clown. In deze scope wordt `this` automatisch gegenereerd en het verwijst naar het object waar het op dit moment in zit. Ofterwel de context.
 
+# Les 7
+
+
+ met alleen {} maak je een block.
+ ```js
+ {
+  content
+ }
+ ```
+ Ook met if else, loop. Zijn ook `block`s. 
+ 
+ Een `const` kan niet veranderen van type, maar kan wel een andere waarde krijgen. 
+ 
+ `var body = document.body`
+ nu hebben we een html element  
+ ```js
+ body.addEventlistener('click', function(){
+ 
+ console.log('de body was clicked') 
+ })'
+ ```
+ Dit is een `callback function` want je roept hem pas aan als er wordt geklikt.
+ 
+ arrow function `=>`
+Als je this doet in de arrow function dan verwijst ie niet naar de functie maar naar de context er buiten. Dus bij het voorbeeld in de les verwees `this` naar the Window. 
