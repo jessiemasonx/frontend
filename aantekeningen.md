@@ -29,6 +29,45 @@ __Immediatly invoked function expression__
 ```
 Het is een anonieme functie die gelijk 'invoked'(uitgevoerd) wordt.
 
+## Hoisting
+
+```js
+a = 2;  
+
+var a;  
+
+console.log( a );
+```
+Door de hoisting lukt de bovenstaande code gewoon wel. `var a` gaat omhoog.   
+Hoisting gebeurt binnen een scope. Dus als er een var in een functie zit gaat die var in die functie bovenaan.  
+Zowel functies als vars worden gehoist. Maar een belamgrijk detail is dat eerst functies worden gehoist en daarna variabelen.
+
+```js
+foo(); // 1
+
+var foo;
+
+function foo() {
+	console.log( 1 );
+}
+
+foo = function() {
+	console.log( 2 );
+};
+```
+wordt
+```js
+function foo() {
+	console.log( 1 );
+}
+
+foo(); // 1
+
+foo = function() {
+	console.log( 2 );
+};
+```
+
 ## kleine dingen
 
 `'string'` , `function hoi(parameter)`
