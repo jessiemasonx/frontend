@@ -1,4 +1,4 @@
-# Aantekeningen filmpjes enzo
+# Aantekeningen alles
 
 ## Promises
 Als er dingen na elkaar moeten gebeuren bij asynchrone code zoals een functie en als die wordt uitgevoerd een andere functie etc dan kan je callbacks in callbacks maken maar dat is heel lelijk en veel code. Je kan beter `.then` gebruiken. Dit hoort bij __promises__.  
@@ -67,6 +67,22 @@ foo = function() {
 	console.log( 2 );
 };
 ```
+## Tokenizing/Lexing, Parsing, Code-Generation
+
+1. Tokenizing/Lexing:
+Een string opbreken in stukjes. Die stukjes heten __tokens__.  
+*Voorbeeld: `var a = 2;` Dit zou opgedeeld worden in deze tokens: `va`r, `a`, `=` en `;`*
+
+2. Parsing:
+Tokens bij elkaar nemen (array) en die omzetten naar een boom van geneste elementen die de grammaticale structuur van het programma voorstellen. Deze boom heet "AST" (Abstraxt Syntax Tree).
+*Voorbeeld: de boom voor `var a = 2;` kan beginnen met een top-level node VariableDeclaration, met een child node Identifier.*
+> idk
+
+3. Code-Generation
+Het proces van het pakken van een AST en het omzetten naar uitvoerbare code. Dit onderdeel varieert afhankelijk van de taal, het platform, etc.
+*Voorbeeld: Er is een manier om de AST van `var a = 2;` te nemen en te veranderen in een set van machine instructies om een variable te maken die `a` heet, en dan een waarde in `a` te stoppen. 
+
+Deze 3 stappen worden in deze volgorde uitgevoerd!! 
 
 ## kleine dingen
 
