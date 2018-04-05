@@ -133,6 +133,19 @@ a {
 - Er wordt genest in scopes en in html. In scopes bijvoorbeeld functies in functies en bij de DOM bij elementen in elementen.
 - __Grouperen.__ Dingen worden in html bij elkaar gezet in containers zoals divs en sections. In de scopes worden dingen bij elkaar gezet bijvoorbeeld in een scope dus een functie.
 
+## Var en Let for loops
+```js
+for (var i = 0; i < 5; i++) {
+}
+```
+```js
+for (let i = 0; i < 5; i++) {
+}
+```
+Als je let heb gebruikt kan je daar van buitenaf niks meer mee doen. Maar als je var hebt gebruikt kan je er nog wel bij.
+
+Variable luistert niet naar block scope. Als var a en let b in een block scope een waarde geeft zal je je de var buiten de scope op kunnen roepen maar let niet. Als die var en die let in een function scope zitten, kunnen ze ALLEBIJ niet worden aangeroepen buiten die functie scope.
+
 ## Eval
 
 In eval() kan je een string zetten.
@@ -143,7 +156,58 @@ De scope kan worden aangepast __at runtime__ door eval().
 
 __eval = evil!!__
 
+## Objecten
 
+### Object literal
+Dit is een object literal:
+```js
+var clown1 = {
+    naam: 'Bassie',
+    schoenmaat: 80,
+    lach: 'whahaha'
+};
+```
+
+Die dingen er in zoals naam een schoenmaat zijn `properties`.
+
+### Constructor function
+
+```js
+function Clown (naam, schoenmaat, lach) { // constructor functie
+  this.naam = naam;
+  this.schonmaat: schoenmaat;
+  this.lach = lach;
+
+  this.laugh = function(){
+    console.log('ik heet ' + this.naam + this.laughType );
+  }
+}
+
+var pipo = new Clown('pipo', 80, 'whoehahahaha')
+
+// nu krijg je terug, door die console.log: ik heet pipo whohahahaha
+```
+
+Nu geef je de waardes van de properties mee als we het object gaan maken.
+
+### Syntactic sugar
+
+```
+'hoi' ${this}  
+in plaats van
+'hoi ' + this
+```
+
+
+### arrow functie
+
+### literal
+
+Een literal houdt in dat je *on the fly* aanmaakt.
+
+```js
+var clowns = new Array()
+```
 
 ## kleine dingen
 
