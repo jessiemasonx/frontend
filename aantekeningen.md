@@ -67,22 +67,83 @@ foo = function() {
 	console.log( 2 );
 };
 ```
+
 ## Tokenizing/Lexing, Parsing, Code-Generation
 
-1. Tokenizing/Lexing:
+__1. Tokenizing/Lexing:__    
 Een string opbreken in stukjes. Die stukjes heten __tokens__.  
 *Voorbeeld: `var a = 2;` Dit zou opgedeeld worden in deze tokens: `va`r, `a`, `=` en `;`*
 
-2. Parsing:
+__2. Parsing:__  
 Tokens bij elkaar nemen (array) en die omzetten naar een boom van geneste elementen die de grammaticale structuur van het programma voorstellen. Deze boom heet "AST" (Abstraxt Syntax Tree).
-*Voorbeeld: de boom voor `var a = 2;` kan beginnen met een top-level node VariableDeclaration, met een child node Identifier.*
-> idk
+*Voorbeeld: de boom voor `var a = 2;` kan beginnen met een top-level node VariableDeclaration, met een child node Identifier.*  
+......idk
 
-3. Code-Generation
+__3. Code-Generation:__   
 Het proces van het pakken van een AST en het omzetten naar uitvoerbare code. Dit onderdeel varieert afhankelijk van de taal, het platform, etc.
-*Voorbeeld: Er is een manier om de AST van `var a = 2;` te nemen en te veranderen in een set van machine instructies om een variable te maken die `a` heet, en dan een waarde in `a` te stoppen. 
+*Voorbeeld: Er is een manier om de AST van `var a = 2;` te nemen en te veranderen in een set van machine instructies om een variable te maken die `a` heet, en dan een waarde in `a` te stoppen.*
 
-Deze 3 stappen worden in deze volgorde uitgevoerd!! 
+Deze 3 stappen worden in deze volgorde uitgevoerd!!
+
+## Call Stack / Call Site
+
+Een call stack keten heeft meestal maximaal 10-15 jumps van de ene naar de andere functie en nog een andere.
+Als je recursive programming gebruikt (een functie die zichzelf herhaaldelijk noemt), of mutual recursion (twee of meer functies roepen elkaar aan), kan de call stack gemakkelijk honderden, duizenden of meer niveaus diep zijn. Dit kan problemen opleveren.  
+Javascript engines hebben een limiet zodat het niet crasht. Daarom krijgen we some `RangeError: Maximum call stack size exceeded`.
+
+De call stack is van begin tot het eind. Call stack van C is bijvoorbeeld A B C. Niet C B A.
+
+De call site is de plek waar het ding waar je de call site van vraagt wordt aangeroepen.
+
+## LHS en RHS
+
+LHS is declaratie  
+RHS is assinging a value  
+
+*Voorbeeld: `var a = 2`  
+LHS: `var a`  
+RHS: `a = 2`*
+
+Als ze vragen om de LHS en de RHS van `function foo(a)` schrijf je `function foo` niet op maar alleen `a`.
+
+## Parser
+
+De parser declareert een var eerst aan het begin van de code, voordat die var een waarde krijgt.
+
+code die ik schrijf:
+```js
+var a {
+  naam: jessie,
+  leeftijd: 19
+}
+```
+
+Code hoe de parser het *leest*
+```js
+var a;
+
+a {
+  naam: jessie,
+  leeftijd: 19
+}
+```
+
+## Overeenkomsten SCOPE en DOM html
+
+- Er wordt genest in scopes en in html. In scopes bijvoorbeeld functies in functies en bij de DOM bij elementen in elementen.
+- __Grouperen.__ Dingen worden in html bij elkaar gezet in containers zoals divs en sections. In de scopes worden dingen bij elkaar gezet bijvoorbeeld in een scope dus een functie.
+
+## Eval
+
+In eval() kan je een string zetten.
+De eval is een soort parser. Hij parst code.   
+Als je eval() gebruikt kan je code-injection doen en kan een hacker jouw code gewoon aanpassen at runtime en daarom wordt het een beetje gezien als cheating.
+
+De scope kan worden aangepast __at runtime__ door eval().
+
+__eval = evil!!__
+
+
 
 ## kleine dingen
 
@@ -110,10 +171,10 @@ null == undefined // true
 null === null // true
  ```
 
- als je een nummer in een string bijvoorbeeld * 1 doet wordt het een number  
+ Als je een nummer in een string bijvoorbeeld * 1 doet wordt het een number  
  En andersom wordt het ook een string
 
-```
+```js
 var a = '4' // '4'
 b = a * 1 // 4
 ```
