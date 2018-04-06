@@ -21,6 +21,14 @@ ajax is asynchroon. Dan gebruik je promises.
 
 Web workers zijn asynchroon.
 
+## Web worker
+
+Een webwerker is een JavaScript dat op de achtergrond wordt uitgevoerd onafhankelijk van andere scripts, zonder de prestaties van de pagina te beïnvloeden. Je kan blijven doen wat je wilt: klikken, dingen selecteren, etc. terwijl de web worker op de achtergrond wordt uitgevoerd.
+
+Het runt op een andere __thread__.
+
+Een *worker* is een object gemaakt met een constructor (bijvoorbeeld `Worker ()`) die een benoemd JavaScript-bestand uitvoert. Dit bestand bevat de code die in de *worker thread* wordt uitgevoerd; workers worden in een andere globale context uitgevoerd.
+
 ## IIFE
 __Immediatly invoked function expression__
 ```js
@@ -128,9 +136,15 @@ a {
 }
 ```
 
+## Polymorphism
+
+Polymorphism beschrijft het idee dat een algemeen gedrag van een parent class kan worden overschreven naar een child class om het meer details te geven.
+
+Class theory zegt dat een parent class en een child class dezelfde method name hebben voor een bepaald gedrag, waardoor de child de parent overschrijft.
+
 ## Overeenkomsten SCOPE en DOM html
 
-- Er wordt genest in scopes en in html. In scopes bijvoorbeeld functies in functies en bij de DOM bij elementen in elementen.
+- Er wordt __genest__ in scopes en in html. In scopes bijvoorbeeld functies in functies en bij de DOM bij elementen in elementen.
 - __Grouperen.__ Dingen worden in html bij elkaar gezet in containers zoals divs en sections. In de scopes worden dingen bij elkaar gezet bijvoorbeeld in een scope dus een functie.
 
 ## Var en Let for loops
@@ -144,7 +158,12 @@ for (let i = 0; i < 5; i++) {
 ```
 Als je let heb gebruikt kan je daar van buitenaf niks meer mee doen. Maar als je var hebt gebruikt kan je er nog wel bij.
 
-Variable luistert niet naar block scope. Als var a en let b in een block scope een waarde geeft zal je je de var buiten de scope op kunnen roepen maar let niet. Als die var en die let in een function scope zitten, kunnen ze ALLEBIJ niet worden aangeroepen buiten die functie scope.
+`var` luistert niet naar block scope. Als var a en let b in een __block scope__ een waarde geeft zal je je de var buiten de scope op kunnen roepen maar let niet. Als die var en die let in een __function scope__ zitten, kunnen ze *ALLEBIJ* niet worden aangeroepen buiten die functie scope.
+
+## Synchroon & Asynchroon
+
+Javascript code is standaard synchroon, tenzij dit anders wordt aangegeven. Dit kan je bijvoorbeeld doen door promises met .then te gebruiken of een callback ofzo.  
+In javascript kan code niet parallel uitgevoerd worden.
 
 ## Eval
 
@@ -198,7 +217,6 @@ in plaats van
 'hoi ' + this
 ```
 
-
 ### arrow functie
 
 ### literal
@@ -209,21 +227,26 @@ Een literal houdt in dat je *on the fly* aanmaakt.
 var clowns = new Array()
 ```
 
+## This
+
+`this` gaat om de context. Niet om de scope.
+Als `this` in een functie wordt aangeroepen spreekt hij die functie aan want dat is de context. Maar als `this` in een arrow functie (`=>`) wordt aangeroepen is die functie niet de context.
+
 ## kleine dingen
 
 `'string'` , `function hoi(parameter)`
 
 ----------
 
-`==	gelijk aaan
-===	zelfde value en type
-!=	net gelijk
-!==	niet zelfde value of type
->	groter dan
-<	kleiner dan
->=	groter of gelijk aan
-<=	kleiner of gelijk aan
-?	Conditional Operator. 1 van de 2 wordt uitgevoerd`
+`==	gelijk aaan  
+===	zelfde value en type  
+!=	net gelijk  
+!==	niet zelfde value of type  
+>	groter dan  
+<	kleiner dan  
+>=	groter of gelijk aan  
+<=	kleiner of gelijk aan  
+?	Conditional Operator. 1 van de 2 wordt uitgevoerd`  
 
 Het enige verschil tussen `==` en `===` is dat `==` elke soort *coercion* zou proberen om er voor te zorgen dat de 2 waardes matchen. `===` doet dit niet.
 
@@ -236,7 +259,7 @@ null === null // true
  ```
 
  Als je een nummer in een string bijvoorbeeld * 1 doet wordt het een number  
- En andersom wordt het ook een string
+ En andersom wordt het ook een string.
 
 ```js
 var a = '4' // '4'
