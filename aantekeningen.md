@@ -23,7 +23,7 @@ Web workers zijn asynchroon.
 
 ## Web worker
 
-Een webwerker is een JavaScript dat op de achtergrond wordt uitgevoerd onafhankelijk van andere scripts, zonder de prestaties van de pagina te beïnvloeden. Je kan blijven doen wat je wilt: klikken, dingen selecteren, etc. terwijl de web worker op de achtergrond wordt uitgevoerd.
+Een web worker is een JavaScript dat op de achtergrond wordt uitgevoerd onafhankelijk van andere scripts, zonder de prestaties van de pagina te beïnvloeden. Je kan blijven doen wat je wilt: klikken, dingen selecteren, etc. terwijl de web worker op de achtergrond wordt uitgevoerd.
 
 Het runt op een andere __thread__.
 
@@ -48,7 +48,7 @@ console.log( a );
 ```
 Door de hoisting lukt de bovenstaande code gewoon wel. `var a` gaat omhoog.   
 Hoisting gebeurt binnen een scope. Dus als er een var in een functie zit gaat die var in die functie bovenaan.  
-Zowel functies als vars worden gehoist. Maar een belamgrijk detail is dat eerst functies worden gehoist en daarna variabelen.
+Zowel functies als vars worden gehoist. Maar een belangrijk detail is dat eerst functies worden gehoist en daarna variabelen.
 
 ```js
 foo(); // 1
@@ -93,27 +93,6 @@ Het proces van het pakken van een AST en het omzetten naar uitvoerbare code. Dit
 
 Deze 3 stappen worden in deze volgorde uitgevoerd!!
 
-## Call Stack / Call Site
-
-Een call stack keten heeft meestal maximaal 10-15 jumps van de ene naar de andere functie en nog een andere.
-Als je recursive programming gebruikt (een functie die zichzelf herhaaldelijk noemt), of mutual recursion (twee of meer functies roepen elkaar aan), kan de call stack gemakkelijk honderden, duizenden of meer niveaus diep zijn. Dit kan problemen opleveren.  
-Javascript engines hebben een limiet zodat het niet crasht. Daarom krijgen we some `RangeError: Maximum call stack size exceeded`.
-
-De call stack is van begin tot het eind. Call stack van C is bijvoorbeeld A B C. Niet C B A.
-
-De call site is de plek waar het ding waar je de call site van vraagt wordt aangeroepen.
-
-## LHS en RHS
-
-LHS is declaratie  
-RHS is assinging a value  
-
-*Voorbeeld: `var a = 2`  
-LHS: `var a`  
-RHS: `a = 2`*
-
-Als ze vragen om de LHS en de RHS van `function foo(a)` schrijf je `function foo` niet op maar alleen `a`.
-
 ## Parser
 
 De parser declareert een var eerst aan het begin van de code, voordat die var een waarde krijgt.
@@ -135,6 +114,43 @@ a {
   leeftijd: 19
 }
 ```
+
+## Call Stack / Call Site
+
+Een call stack keten heeft meestal maximaal 10-15 jumps van de ene naar de andere functie en nog een andere.
+Als je *recursive programming* gebruikt (een functie die zichzelf herhaaldelijk noemt), of *mutual recursion* (twee of meer functies roepen elkaar aan), kan de call stack gemakkelijk honderden, duizenden of meer niveaus diep zijn. Dit kan problemen opleveren.  
+Javascript engines hebben een limiet zodat het niet crasht. Daarom krijgen we some `RangeError: Maximum call stack size exceeded`.
+
+De call stack is van begin tot het eind. Call stack van C is bijvoorbeeld A B C. Niet C B A.
+
+De __call site__ is de plek waar het ding waar je de call site van vraagt wordt aangeroepen.
+
+Dus stel je voor:
+```js
+ function hello {
+  joe();
+  console.log('hello')
+}
+
+function joe {
+  console.log('joejoe')
+}
+
+hello();
+```
+De _callsite_ van `hello()` is `joe()`.
+
+## LHS en RHS
+
+LHS is declaratie  
+RHS is assinging a value  
+
+*Voorbeeld: `var a = 2`  
+LHS: `var a`  
+RHS: `a = 2`*
+
+Als ze vragen om de LHS en de RHS van `function foo(a)` schrijf je `function foo` niet op maar alleen `a`.
+
 
 ## Polymorphism
 
@@ -230,7 +246,7 @@ var clowns = new Array()
 ## This
 
 `this` gaat om de context. Niet om de scope.
-Als `this` in een functie wordt aangeroepen spreekt hij die functie aan want dat is de context. Maar als `this` in een arrow functie (`=>`) wordt aangeroepen is die functie niet de context.
+Als `this` in een functie wordt aangeroepen spreekt hij die functie aan want dat is de context. Maar als `this` in een __arrow functie__ (`=>`) of een __IIFE__ wordt aangeroepen is die functie niet de context.
 
 ## kleine dingen
 
@@ -240,7 +256,7 @@ Als `this` in een functie wordt aangeroepen spreekt hij die functie aan want dat
 
 `==	gelijk aaan  
 ===	zelfde value en type  
-!=	net gelijk  
+!=	niet gelijk  
 !==	niet zelfde value of type  
 >	groter dan  
 <	kleiner dan  
@@ -264,6 +280,7 @@ null === null // true
 ```js
 var a = '4' // '4'
 b = a * 1 // 4
+var c = b.toString() // '4'
 ```
 Typeof null is een object  
 new alles is een object
